@@ -1,0 +1,7 @@
+# Tooling / installers (too large for GitHub, not project code)
+ArduinoAppLab_*/
+*.tar.gz
+*.AppImage
+
+# Upstream reference clone (Mjrovai/XIAO-ESP32S3-Sense)
+XIAO-ESP32S3-Sense/
