@@ -29,18 +29,20 @@ export Arduino library (INT8) → deploy sketch → add petbot behaviour.**
 
 | Lab | petbot version |
 |---|---|
-| Classes: `yes`, `no`, `noise`, `unknown` | Classes: `wake` (petbot's name), `noise`, `unknown` |
+| Classes: `yes`, `no`, `noise`, `unknown` | Classes: `jasmin`, `noise`, `unknown` |
 | Google Speech Commands, 1,500+ clips/word | Our own recordings plus Speech Commands for `unknown` and `noise` |
 | LED lights on "yes" | petbot "wakes up": LED/OLED shows it is listening, then starts Phase 2 vision |
 
 **Steps**
 1. Run the lab end-to-end with yes/no to prove the pipeline.
-2. **Pick the wake word.** Choose 2–3 syllables with distinct sounds. Quick-win option:
-   Speech Commands already has `marvin` and `sheila` (~2k clips each), so a wake word
-   can be trained before any recording. Custom option: record our own word (e.g. "petbot").
+2. **Wake word: "Jasmin"** (JAZ-min). It isn't in Speech Commands, so we record it ourselves.
 3. Record data with `Wav_Record_dataset` (10 s WAVs on SD, split into 1 s clips):
-   aim for **≥300 clips** of the wake word, several speakers, distances, rooms.
-   Also record household noise (TV, fan, the pet itself) for `noise`.
+   - `jasmin`: aim for **≥300 clips** (500+ is better). Use several speakers, tones, speeds,
+     distances (0.5–3 m) and rooms. Record on the XIAO mic itself so the training audio matches the device.
+   - `unknown`: Speech Commands words **plus our own recordings of sound-alikes**, e.g.
+     "jazz", "jasmine rice", "just in", "has been", "Jason", "chasm", so the model learns
+     what *isn't* the wake word.
+   - `noise`: household background (TV, fan, kitchen, the pet itself) plus Speech Commands `_background_noise_`.
 4. Edge Impulse: 1 s window, 16 kHz, **MFCC**, small 2-layer CNN (lab settings), data augmentation on.
 5. Deploy from `xiao_esp32s3_microphone_led` / `xiaoml-kit_kws_oled`.
    Mic pins: CLK GPIO42, DATA GPIO41.
@@ -50,7 +52,7 @@ export Arduino library (INT8) → deploy sketch → add petbot behaviour.**
 targets ESP-EYE, so remap the I2S pins to 42/41; upload WAVs to Edge Impulse instead of using the
 data forwarder (audio is too fast for it).
 
-**Done when:** petbot reliably wakes on its name and rarely on TV/background talk.
+**Done when:** petbot reliably wakes on "Jasmin" and rarely on TV/background talk.
 
 ---
 
@@ -103,6 +105,6 @@ Requires the XIAOML Kit IMU board (LSM6DS3TR-C).
 - **Chain everything:** wake word → vision check → report over Wi-Fi/BLE.
 
 ## Open decisions
-- [ ] Wake word: `marvin`/`sheila` (fast) or a custom word like "petbot"
+- [x] Wake word: **"Jasmin"** (custom recordings)
 - [ ] Which pet(s)? That sets the Phase 2/3 classes.
 - [ ] Plain Sense board or XIAOML Kit with IMU/OLED (affects Phase 4 and OLED output)

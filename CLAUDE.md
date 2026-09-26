@@ -5,7 +5,7 @@ Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device Tin
 
 ## Project
 
-- **Goal:** a pet-aware bot. First a **wake word**, then **computer vision** to find the pet.
+- **Goal:** a pet-aware bot. First a **wake word ("Jasmin")**, then **computer vision** to find the pet.
 - **Plan:** follow the mlsysbook.ai XIAO labs, re-themed for petbot. See **[ROADMAP.md](ROADMAP.md)**.
   Phase 0 bring-up → 1 wake word (KWS) → 2 pet image classification → 3 pet object detection (FOMO) → 4 motion (optional)
 - **Actuators / outputs:** TBD
@@ -85,6 +85,7 @@ Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device Tin
 Current phase: **Phase 0 — board bring-up** (see ROADMAP.md)
 
 - [x] Decide goals: wake word first, then vision
-- [ ] Open decisions (see ROADMAP.md): wake word, pet type(s), plain Sense or XIAOML Kit
+- [x] Wake word: "Jasmin"
+- [ ] Open decisions (see ROADMAP.md): pet type(s), plain Sense or XIAOML Kit
 - [ ] Phase 0: downgrade esp32 package to 2.0.17, blink, mic test, camera web server
-- [ ] Phase 1: run KWS lab as written, then train the petbot wake word
+- [ ] Phase 1: run KWS lab as written, then record "Jasmin" dataset and train the wake word
