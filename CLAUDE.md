@@ -3,13 +3,11 @@
 Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device TinyML
 (vision, sound, motion).
 
-> Project goals, behaviours, actuators, and power setup are still TBD — fill in
-> the "Project" section as they are decided.
-
 ## Project
 
-- **Goal:** TBD
-- **Behaviours:** TBD (e.g. recognise pet via camera, react to sounds, detect motion)
+- **Goal:** a pet-aware bot. First a **wake word**, then **computer vision** to find the pet.
+- **Plan:** follow the mlsysbook.ai XIAO labs, re-themed for petbot. See **[ROADMAP.md](ROADMAP.md)**.
+  Phase 0 bring-up → 1 wake word (KWS) → 2 pet image classification → 3 pet object detection (FOMO) → 4 motion (optional)
 - **Actuators / outputs:** TBD
 - **Power:** TBD (USB-C 5V, or 3.7V LiPo via the XIAO battery pads / IMU board header)
 
@@ -41,8 +39,8 @@ Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device Tin
   - Tools → PSRAM: **OPI PSRAM** (required for camera + ML)
   - Do **not** use the "Arduino ESP32 Boards" package (`arduino:esp32`) — that is for the Nano ESP32.
 - **Version gotcha:** this machine has esp32 **3.3.12** installed. The Harvard/Rovai labs
-  recommend **2.0.x** for Edge Impulse–exported libraries. If an Edge Impulse library
-  fails to compile, downgrade the board package to 2.0.x.
+  pin **2.0.17** ("do not update") for Edge Impulse–exported libraries. Downgrade
+  to 2.0.17 before Phase 1 deployment.
 - Serial port: `/dev/ttyACM0` (native USB). If upload fails, hold BOOT while plugging in.
 - Camera pin map: `#define CAMERA_MODEL_XIAO_ESP32S3`
 - ML: Edge Impulse Studio (train → export Arduino library), plus local
@@ -84,7 +82,9 @@ Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device Tin
 
 ## Status / next steps
 
-- [ ] Decide project goal and behaviours (fill in "Project" above)
-- [ ] Confirm hardware: plain XIAO ESP32S3 Sense or full XIAOML Kit (IMU/OLED board)?
-- [ ] Run the setup lab: blink, camera web server, mic test
-- [ ] Pick the first ML capability (e.g. pet image classification) and collect a dataset
+Current phase: **Phase 0 — board bring-up** (see ROADMAP.md)
+
+- [x] Decide goals: wake word first, then vision
+- [ ] Open decisions (see ROADMAP.md): wake word, pet type(s), plain Sense or XIAOML Kit
+- [ ] Phase 0: downgrade esp32 package to 2.0.17, blink, mic test, camera web server
+- [ ] Phase 1: run KWS lab as written, then train the petbot wake word
