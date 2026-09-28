@@ -109,7 +109,7 @@ Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device Tin
 
 ## Status / next steps
 
-Current phase: **Phase 0 — board bring-up** (see ROADMAP.md)
+Current phase: **Phase 1 — wake word** (see ROADMAP.md). Phase 0 done 2026-09-28.
 
 - [x] Decide goals: wake word first, then vision
 - [x] Wake word: "Jasmin"
@@ -120,5 +120,7 @@ Current phase: **Phase 0 — board bring-up** (see ROADMAP.md)
 - [x] Phase 0 on hardware: `mic_test` flashed; quiet-room level ~10–25 (RMS, DC removed)
 - [x] Phase 0 on hardware: `wifi_test` OK on "home-wifi" (2.4 GHz ch 6), IP 192.168.86.189 (DHCP), RSSI -48 dBm,
   pings to gateway/8.8.8.8 and DNS all OK, laptop → board ping OK
-- [ ] Phase 0 on hardware: `sd_test` (needs FAT32 card), `camera_webserver` (fill in `secrets.h`)
-- [ ] Phase 1: run KWS lab as written, then record "Jasmin" dataset and train the wake word
+- [x] Phase 0 on hardware: `camera_webserver` running at http://192.168.86.189 (stream on :81/stream,
+  still frame at /capture); 320x240 capture verified
+- [x] Phase 0 on hardware: `sd_test` passed (32 GB SDHC, FAT32, write/read OK)
+- [ ] Phase 1: next step: run the KWS lab as written (yes/no) to prove the Edge Impulse → Arduino pipeline, then record "Jasmin" dataset and train the wake word

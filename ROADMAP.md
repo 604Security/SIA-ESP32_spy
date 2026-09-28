@@ -12,7 +12,7 @@ export Arduino library (INT8) → deploy sketch → add petbot behaviour.**
 
 ---
 
-## Phase 0 — Board bring-up
+## Phase 0 — Board bring-up ✅ (done 2026-09-28)
 **Lab:** [Setup](https://mlsysbook.ai/kits/contents/seeed/xiao_esp32s3/setup/setup.html)
 
 - Install "esp32 by Espressif Systems" **2.0.17**, board `XIAO_ESP32S3`, PSRAM = **OPI PSRAM** ✅

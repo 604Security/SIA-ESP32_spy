@@ -10,8 +10,8 @@ const int SD_CS = 21;
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial) {
-  }
+  delay(2000);  // give the USB serial time to come up
+  Serial.println("petbot sd_test starting");
 
   if (!SD.begin(SD_CS)) {
     Serial.println("Card mount failed: check the card is inserted and FAT32");
