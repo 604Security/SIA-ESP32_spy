@@ -38,13 +38,35 @@ Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device Tin
   - Board: `XIAO_ESP32S3` (FQBN `esp32:esp32:XIAO_ESP32S3`)
   - Tools → PSRAM: **OPI PSRAM** (required for camera + ML)
   - Do **not** use the "Arduino ESP32 Boards" package (`arduino:esp32`) — that is for the Nano ESP32.
-- **Version gotcha:** this machine has esp32 **3.3.12** installed. The Harvard/Rovai labs
-  pin **2.0.17** ("do not update") for Edge Impulse–exported libraries. Downgrade
-  to 2.0.17 before Phase 1 deployment.
+- **Version:** esp32 core pinned at **2.0.17** (downgraded from 3.3.12 on 2026-09-28), as the
+  Harvard/Rovai labs require for Edge Impulse–exported libraries. Do not update it in Boards Manager.
+  Lab sketches written for 3.x (e.g. `XIAOML_Kit_Mic_Test`, which uses `ESP_I2S.h`) won't build on it;
+  use the 2.x `I2S.h` API instead.
+- CLI: `arduino-cli` 1.5.1 in `~/tools/arduino-cli/`, using the IDE's config
+  (`~/.arduinoIDE/arduino-cli.yaml`). The repo `Makefile` wraps it:
+  `make build|flash SKETCH=firmware/phase0/blink`, `make monitor`, `make phase0` (build all).
+  FQBN with options: `esp32:esp32:XIAO_ESP32S3:PSRAM=opi,UploadSpeed=115200`.
+  Run `make` from the repo root.
 - Serial port: `/dev/ttyACM0` (native USB). If upload fails, hold BOOT while plugging in.
 - Camera pin map: `#define CAMERA_MODEL_XIAO_ESP32S3`
 - ML: Edge Impulse Studio (train → export Arduino library), plus local
   `ArduTFLite` / `Chirale_TensorFlowLite` libraries in `~/Arduino/libraries`
+
+### USB / upload troubleshooting (learned 2026-09-28)
+- The board does **not** mount as a USB drive. It shows up as a serial port: `lsusb` lists
+  `303a:1001 Espressif USB JTAG/serial debug unit`, and `/dev/ttyACM0` appears.
+  Check with `watch -n1 'lsusb | grep -i 303a; ls /dev/ttyACM*'`.
+- Not in `lsusb` at all → the cable is likely charge-only (use a data cable), or the board is behind the dock/hub.
+- **Plug the board directly into the laptop**, not through the ThinkPad USB-C dock.
+- **Upload fails with "No serial data received" / "Unable to verify flash chip connection"**
+  right after "Stub running..." → esptool's stub loader drops the link. Changing the baud rate
+  (921600, 115200, even 9600) does not help, because the port is virtual.
+  **Fix: `--no-stub`**, which `make flash` passes by default (`UPLOAD_FLAGS` in the Makefile).
+  The Arduino IDE Upload button can't pass it, so always flash with `make flash`.
+- Quick link check: `python3 ~/.arduino15/packages/esp32/tools/esptool_py/4.5.1/esptool.py --chip esp32s3 -p /dev/ttyACM0 --no-stub flash_id`
+  (should report 8 MB flash).
+- ModemManager is running and can probe ACM ports. It didn't block uploads, but if the port
+  acts up: `sudo systemctl stop ModemManager`.
 
 ## Reference material
 
@@ -77,6 +99,8 @@ Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device Tin
 
 ## Repo conventions
 
+- Firmware sketches live in `firmware/<phase>/<sketch>/<sketch>.ino`.
+- Wi-Fi credentials go in a per-sketch `secrets.h` (gitignored); copy it from `secrets.h.example`.
 - Installers/tooling live in `~/tools/`, not in this repo (see `.gitignore`).
 - Keep the "Status / next steps" section below current at the end of each session.
 
@@ -87,5 +111,8 @@ Current phase: **Phase 0 — board bring-up** (see ROADMAP.md)
 - [x] Decide goals: wake word first, then vision
 - [x] Wake word: "Jasmin"
 - [ ] Open decisions (see ROADMAP.md): pet type(s), plain Sense or XIAOML Kit
-- [ ] Phase 0: downgrade esp32 package to 2.0.17, blink, mic test, camera web server
+- [x] Phase 0: esp32 core downgraded to 2.0.17; arduino-cli + Makefile set up
+- [x] Phase 0: sketches written and compiling in `firmware/phase0/` (blink, mic_test, sd_test, camera_webserver)
+- [x] Phase 0 on hardware: board detected, USB upload fixed (`--no-stub`), `blink` flashed and running
+- [ ] Phase 0 on hardware: `mic_test`, `sd_test` (needs FAT32 card), `camera_webserver` (fill in `secrets.h`)
 - [ ] Phase 1: run KWS lab as written, then record "Jasmin" dataset and train the wake word

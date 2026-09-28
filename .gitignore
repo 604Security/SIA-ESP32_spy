@@ -5,3 +5,6 @@ ArduinoAppLab_*/
 
 # Upstream reference clone (Mjrovai/XIAO-ESP32S3-Sense)
 XIAO-ESP32S3-Sense/
+
+# Wi-Fi credentials
+secrets.h

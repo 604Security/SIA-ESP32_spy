@@ -15,9 +15,13 @@ export Arduino library (INT8) → deploy sketch → add petbot behaviour.**
 ## Phase 0 — Board bring-up
 **Lab:** [Setup](https://mlsysbook.ai/kits/contents/seeed/xiao_esp32s3/setup/setup.html)
 
-- Install "esp32 by Espressif Systems" **2.0.17**, board `XIAO_ESP32S3`, PSRAM = **OPI PSRAM**
-- Blink the LED, run the mic test (`XIAOML_Kit_code/XIAOML_Kit_Mic_Test`), and run the camera web server
-  (`Camera_HTTP_Server_STA`)
+- Install "esp32 by Espressif Systems" **2.0.17**, board `XIAO_ESP32S3`, PSRAM = **OPI PSRAM** ✅
+- Sketches in `firmware/phase0/` (`make flash SKETCH=firmware/phase0/<name>`, then `make monitor`):
+  - `blink`: user LED (GPIO21, active low) blinks at 1 Hz
+  - `mic_test`: prints the RMS audio level every 50 ms; open the Serial Plotter and clap
+  - `sd_test`: mounts a FAT32 microSD card, lists it, and writes/reads a test file
+  - `camera_webserver`: core CameraWebServer example set up for the XIAO; put your Wi-Fi details in `secrets.h`,
+    then open the IP it prints and click *Start Stream*
 - Format a microSD card as FAT32 (needed for audio dataset capture)
 
 **Done when:** the camera stream shows in a browser and the mic test shows audio levels.
