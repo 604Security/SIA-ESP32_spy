@@ -1,4 +1,4 @@
-// petbot-test web page, served at "/". Plain HTML/CSS/JS, no build step.
+// AI petbot test menu web page, served at "/". Plain HTML/CSS/JS, no build step.
 #pragma once
 
 const char PAGE_HTML[] PROGMEM = R"rawliteral(<!doctype html>
@@ -6,7 +6,7 @@ const char PAGE_HTML[] PROGMEM = R"rawliteral(<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>petbot-test</title>
+<title>AI petbot · test</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
 <style>
@@ -130,12 +130,12 @@ footer{text-align:center; color:var(--muted); font-size:15px; margin-top:34px}
 <body>
 <header>
   <div class="hero">
-<pre class="banner" aria-label="petbot">            _   _           _
- _ __   ___| |_| |__   ___ | |_
-| '_ \ / _ \ __| '_ \ / _ \| __|
-| |_) |  __/ |_| |_) | (_) | |_
-| .__/ \___|\__|_.__/ \___/ \__|
-|_|</pre>
+<pre class="banner" aria-label="AI petbot">    _    ___               _   _           _
+   / \  |_ _|   _ __   ___| |_| |__   ___ | |_
+  / _ \  | |   | '_ \ / _ \ __| '_ \ / _ \| __|
+ / ___ \ | |   | |_) |  __/ |_| |_) | (_) | |_
+/_/   \_\___|  | .__/ \___|\__|_.__/ \___/ \__|
+               |_|</pre>
     <span class="tag">test!</span>
   </div>
 </header>
@@ -146,7 +146,7 @@ footer{text-align:center; color:var(--muted); font-size:15px; margin-top:34px}
   <div class="greet">
     <pre class="pet" id="pet-home" aria-hidden="true"></pre>
     <canvas class="unicorn small" id="unicorn-home" width="144" height="160" aria-hidden="true"></canvas>
-    <div class="bubble">Hi! I'm petbot.<small>What should we test today?</small></div>
+    <div class="bubble">Hi! I'm AI petbot.<small>What should we test today?</small></div>
   </div>
   <nav class="tiles">
     <a class="tile t-yellow" href="#lights"><span class="emo">💡</span><b>Lights</b><small>Make my light blink!</small></a>
@@ -254,7 +254,7 @@ footer{text-align:center; color:var(--muted); font-size:15px; margin-top:34px}
   </dl>
 </section>
 
-<footer>petbot-test · made with ❤️ for our pet</footer>
+<footer>AI petbot test · made with ❤️ for our pet</footer>
 </main>
 
 <script>
@@ -305,8 +305,10 @@ function drawOled(cv, t, text) {
   g.font = 'bold ' + (px * 10) + 'px "Space Mono", monospace';
   g.textAlign = 'center'; g.textBaseline = 'alphabetic';
   if (text === null) {
-    g.fillText('Hi!', 54 * px, 15 * px);
-    const r = (Math.floor(t / 400) % 2 ? 3 : 2) * px, cx = 54 * px, cy = 24 * px;
+    g.fillText('AI', 54 * px, 12 * px);
+    g.font = (px * 7) + 'px "Space Mono", monospace';
+    g.fillText('petbot', 54 * px, 22 * px);
+    const r = (Math.floor(t / 400) % 2 ? 2 : 1.5) * px, cx = 54 * px, cy = 28 * px;
     g.beginPath(); g.arc(cx - r, cy, r, 0, 7); g.arc(cx + r, cy, r, 0, 7); g.fill();
     g.beginPath(); g.moveTo(cx - 2 * r - px, cy + px); g.lineTo(cx + 2 * r + px, cy + px); g.lineTo(cx, cy + 2 * r + 3 * px); g.fill();
   } else {

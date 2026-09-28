@@ -1,4 +1,4 @@
-# petbot
+# AI petbot
 
 Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device TinyML
 (vision, sound, motion).
@@ -123,11 +123,11 @@ Current phase: **Phase 1 — wake word** (see ROADMAP.md). Phase 0 done 2026-09-
 - [x] Phase 0: sketches written and compiling in `firmware/phase0/` (blink, mic_test, sd_test, camera_webserver)
 - [x] Phase 0 on hardware: board detected, USB upload fixed (`--no-stub`), `blink` flashed and running
 - [x] Phase 0 on hardware: `mic_test` flashed; quiet-room level ~10–25 (RMS, DC removed)
-- [x] Phase 0 on hardware: `wifi_test` OK on "home-wifi" (2.4 GHz ch 6), IP 192.168.86.189 (DHCP), RSSI -48 dBm,
+- [x] Phase 0 on hardware: `wifi_test` OK on the home 2.4 GHz network (name in `secrets.h`, ch 6), IP 192.168.86.189 (DHCP), RSSI -48 dBm,
   pings to gateway/8.8.8.8 and DNS all OK, laptop → board ping OK
 - [x] Phase 0 on hardware: `camera_webserver` running at http://192.168.86.189 (stream on :81/stream,
   still frame at /capture); 320x240 capture verified
 - [x] Phase 0 on hardware: `sd_test` passed (32 GB SDHC, FAT32, write/read OK)
-- [x] `petbot-test` (`firmware/petbot_test`, `make petbot-test`): kid-friendly web test menu (lights, sounds,
+- [x] **AI petbot test menu** (`firmware/petbot_test`, `make petbot-test`): kid-friendly web test menu (lights, sounds,
   camera, OLED unicorn + messages, SD, Wi-Fi) at http://192.168.86.189 or http://petbot.local
 - [ ] Phase 1: next step: run the KWS lab as written (yes/no) to prove the Edge Impulse → Arduino pipeline, then record "Jasmin" dataset and train the wake word

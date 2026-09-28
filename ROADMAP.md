@@ -1,4 +1,4 @@
-# petbot roadmap — mlsysbook.ai labs mapped to petbot
+# AI petbot roadmap — mlsysbook.ai labs mapped to petbot
 
 The Harvard *Machine Learning Systems* book has four hands-on labs for the XIAO ESP32S3
 Sense (XIAOML Kit), written by Marcelo Rovai. Each petbot phase follows one lab. Do the

@@ -1,4 +1,4 @@
-// petbot-test: a friendly test menu for petbot, served over Wi-Fi.
+// AI petbot test menu: a friendly test menu for petbot, served over Wi-Fi.
 //
 // Open the address printed on serial (or http://petbot.local) and pick a test:
 //   Lights, Sounds, Eyes (camera), Memory (microSD), Wi-Fi, Screen.
@@ -66,12 +66,12 @@ char sdResult[8] = "?";
 U8G2_SSD1306_72X40_ER_F_HW_I2C u8g2(U8G2_R2, U8X8_PIN_NONE);
 
 const char BANNER[] = R"ART(
-             _   _           _
-  _ __   ___| |_| |__   ___ | |_       *
- | '_ \ / _ \ __| '_ \ / _ \| __|   /\ | /\
- | |_) |  __/ |_| |_) | (_) | |_   / (o o) \
- | .__/ \___|\__|_.__/ \___/ \__|    \ ^ /
- |_|           ~ test ~               '-'
+    _    ___               _   _           _
+   / \  |_ _|   _ __   ___| |_| |__   ___ | |_         *
+  / _ \  | |   | '_ \ / _ \ __| '_ \ / _ \| __|    /\  |  /\
+ / ___ \ | |   | |_) |  __/ |_| |_) | (_) | |_    / (o   o) \
+/_/   \_\___|  | .__/ \___|\__|_.__/ \___/ \__|     \  ^  /
+               |_|  ~ test ~                         '---'
 )ART";
 
 // ---------------------------------------------------------------- LED
@@ -287,8 +287,10 @@ void updateScreen() {
   switch (screenView) {
     case V_HOME:
       u8g2.setFont(u8g2_font_helvB10_tr);
-      drawCentered("Hi!", 14);
-      drawHeart(54, 24, (now / 400) % 2 ? 3 : 2);
+      drawCentered("AI", 12);
+      u8g2.setFont(u8g2_font_5x8_tr);
+      drawCentered("petbot", 22);
+      drawHeart(54, 28, (now / 400) % 2 ? 2 : 1);
       break;
     case V_LIGHTS:
       u8g2.setFont(u8g2_font_5x8_tr);
@@ -513,7 +515,7 @@ void printMenu() {
     return;
   }
   String base = "http://" + WiFi.localIP().toString();
-  Serial.println("  petbot is awake! Click a link to start a test:\n");
+  Serial.println("  AI petbot is awake! Click a link to start a test:\n");
   Serial.printf("    Menu     %s/\n", base.c_str());
   Serial.printf("    Lights   %s/#lights\n", base.c_str());
   Serial.printf("    Sounds   %s/#sounds\n", base.c_str());
@@ -529,7 +531,7 @@ void printMenu() {
 void setup() {
   Serial.begin(115200);
   delay(2000);  // give the USB serial time to come up
-  Serial.println("petbot-test starting...");
+  Serial.println("AI petbot test starting...");
 
   pinMode(LED_PIN, OUTPUT);
   setLed(false);

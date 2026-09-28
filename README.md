@@ -1,4 +1,4 @@
-# petbot
+# AI petbot
 
 Pet robot project built on the [Seeed XIAO ESP32S3 Sense](https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/),
 using on-device TinyML for vision, sound, and motion.
