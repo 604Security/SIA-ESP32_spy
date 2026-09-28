@@ -112,4 +112,4 @@ Requires the XIAOML Kit IMU board (LSM6DS3TR-C).
 ## Open decisions
 - [x] Wake word: **"Jasmin"** (custom recordings)
 - [ ] Which pet(s)? That sets the Phase 2/3 classes.
-- [ ] Plain Sense board or XIAOML Kit with IMU/OLED (affects Phase 4 and OLED output)
+- [x] Hardware: **XIAOML Kit** with IMU/OLED (confirmed by I2C scan: OLED 0x3C, IMU 0x6A)

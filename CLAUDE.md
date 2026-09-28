@@ -51,6 +51,8 @@ Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device Tin
 - Camera pin map: `#define CAMERA_MODEL_XIAO_ESP32S3`
 - ML: Edge Impulse Studio (train → export Arduino library), plus local
   `ArduTFLite` / `Chirale_TensorFlowLite` libraries in `~/Arduino/libraries`
+- OLED: U8g2 2.36 installed; constructor `U8G2_SSD1306_72X40_ER_F_HW_I2C u8g2(U8G2_R2, U8X8_PIN_NONE)`.
+  The OLED is one-colour (white), so colour art goes on the web page instead.
 
 ### USB / upload troubleshooting (learned 2026-09-28)
 - The board does **not** mount as a USB drive. It shows up as a serial port: `lsusb` lists
@@ -68,6 +70,8 @@ Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device Tin
 - Reading serial non-interactively (e.g. from Claude's shell): `arduino-cli monitor` under `timeout`/pipes
   prints nothing. Use `stty -F /dev/ttyACM0 115200 raw -echo; timeout 5 cat /dev/ttyACM0` instead.
   `make monitor` is fine in an interactive terminal.
+- **Mic + camera together:** start I2S (the mic) *before* `esp_camera_init()`. If I2S starts after the
+  camera (even once, then stopped), `esp_camera_fb_get()` times out from then on. See `petbot_test.ino`.
 - ModemManager is running and can probe ACM ports. It didn't block uploads, but if the port
   acts up: `sudo systemctl stop ModemManager`.
 
@@ -113,7 +117,8 @@ Current phase: **Phase 1 — wake word** (see ROADMAP.md). Phase 0 done 2026-09-
 
 - [x] Decide goals: wake word first, then vision
 - [x] Wake word: "Jasmin"
-- [ ] Open decisions (see ROADMAP.md): pet type(s), plain Sense or XIAOML Kit
+- [x] Hardware: **XIAOML Kit** (I2C scan found OLED 0x3C + IMU 0x6A)
+- [ ] Open decision (see ROADMAP.md): pet type(s)
 - [x] Phase 0: esp32 core downgraded to 2.0.17; arduino-cli + Makefile set up
 - [x] Phase 0: sketches written and compiling in `firmware/phase0/` (blink, mic_test, sd_test, camera_webserver)
 - [x] Phase 0 on hardware: board detected, USB upload fixed (`--no-stub`), `blink` flashed and running
@@ -123,4 +128,6 @@ Current phase: **Phase 1 — wake word** (see ROADMAP.md). Phase 0 done 2026-09-
 - [x] Phase 0 on hardware: `camera_webserver` running at http://192.168.86.189 (stream on :81/stream,
   still frame at /capture); 320x240 capture verified
 - [x] Phase 0 on hardware: `sd_test` passed (32 GB SDHC, FAT32, write/read OK)
+- [x] `petbot-test` (`firmware/petbot_test`, `make petbot-test`): kid-friendly web test menu (lights, sounds,
+  camera, OLED unicorn + messages, SD, Wi-Fi) at http://192.168.86.189 or http://petbot.local
 - [ ] Phase 1: next step: run the KWS lab as written (yes/no) to prove the Edge Impulse → Arduino pipeline, then record "Jasmin" dataset and train the wake word
