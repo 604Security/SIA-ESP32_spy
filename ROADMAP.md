@@ -19,6 +19,7 @@ export Arduino library (INT8) → deploy sketch → add petbot behaviour.**
 - Sketches in `firmware/phase0/` (`make flash SKETCH=firmware/phase0/<name>`, then `make monitor`):
   - `blink`: user LED (GPIO21, active low) blinks at 1 Hz
   - `mic_test`: prints the RMS audio level every 50 ms; open the Serial Plotter and clap
+  - `wifi_test`: joins Wi-Fi (`secrets.h`), prints IP/RSSI/channel, and pings the router and 8.8.8.8 and checks DNS every 10 s
   - `sd_test`: mounts a FAT32 microSD card, lists it, and writes/reads a test file
   - `camera_webserver`: core CameraWebServer example set up for the XIAO; put your Wi-Fi details in `secrets.h`,
     then open the IP it prints and click *Start Stream*

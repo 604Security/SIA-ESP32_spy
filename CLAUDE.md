@@ -65,6 +65,9 @@ Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device Tin
   The Arduino IDE Upload button can't pass it, so always flash with `make flash`.
 - Quick link check: `python3 ~/.arduino15/packages/esp32/tools/esptool_py/4.5.1/esptool.py --chip esp32s3 -p /dev/ttyACM0 --no-stub flash_id`
   (should report 8 MB flash).
+- Reading serial non-interactively (e.g. from Claude's shell): `arduino-cli monitor` under `timeout`/pipes
+  prints nothing. Use `stty -F /dev/ttyACM0 115200 raw -echo; timeout 5 cat /dev/ttyACM0` instead.
+  `make monitor` is fine in an interactive terminal.
 - ModemManager is running and can probe ACM ports. It didn't block uploads, but if the port
   acts up: `sudo systemctl stop ModemManager`.
 
@@ -114,5 +117,8 @@ Current phase: **Phase 0 — board bring-up** (see ROADMAP.md)
 - [x] Phase 0: esp32 core downgraded to 2.0.17; arduino-cli + Makefile set up
 - [x] Phase 0: sketches written and compiling in `firmware/phase0/` (blink, mic_test, sd_test, camera_webserver)
 - [x] Phase 0 on hardware: board detected, USB upload fixed (`--no-stub`), `blink` flashed and running
-- [ ] Phase 0 on hardware: `mic_test`, `sd_test` (needs FAT32 card), `camera_webserver` (fill in `secrets.h`)
+- [x] Phase 0 on hardware: `mic_test` flashed; quiet-room level ~10–25 (RMS, DC removed)
+- [x] Phase 0 on hardware: `wifi_test` OK on "home-wifi" (2.4 GHz ch 6), IP 192.168.86.189 (DHCP), RSSI -48 dBm,
+  pings to gateway/8.8.8.8 and DNS all OK, laptop → board ping OK
+- [ ] Phase 0 on hardware: `sd_test` (needs FAT32 card), `camera_webserver` (fill in `secrets.h`)
 - [ ] Phase 1: run KWS lab as written, then record "Jasmin" dataset and train the wake word

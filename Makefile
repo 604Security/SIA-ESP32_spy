@@ -22,5 +22,5 @@ monitor:
 	$(CLI) monitor -p $(PORT) -c baudrate=115200
 
 phase0:
-	@for s in blink mic_test sd_test camera_webserver; do \
+	@for s in blink mic_test wifi_test sd_test camera_webserver; do \
 		$(MAKE) --no-print-directory build SKETCH=firmware/phase0/$$s || exit 1; done
