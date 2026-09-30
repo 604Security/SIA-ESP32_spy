@@ -3,6 +3,7 @@
 #   make flash SKETCH=firmware/phase0/blink
 #   make monitor
 #   make petbot-test
+#   make spy
 
 CLI    ?= $(HOME)/tools/arduino-cli/arduino-cli --config-file $(HOME)/.arduinoIDE/arduino-cli.yaml
 FQBN   ?= esp32:esp32:XIAO_ESP32S3:PSRAM=opi,UploadSpeed=115200
@@ -11,7 +12,7 @@ SKETCH ?= firmware/phase0/blink
 # esptool's stub loader drops the USB-serial link on this setup; the ROM loader works
 UPLOAD_FLAGS ?= --upload-property upload.flags=--no-stub
 
-.PHONY: build flash monitor phase0 petbot-test
+.PHONY: build flash monitor phase0 petbot-test spy
 
 build:
 	$(CLI) compile --fqbn $(FQBN) $(SKETCH)
@@ -29,3 +30,7 @@ phase0:
 # Fun test menu for petbot (web page + OLED unicorn): flash it, then open the link it prints
 petbot-test:
 	$(MAKE) --no-print-directory flash SKETCH=firmware/petbot_test
+
+# SIA - Secret Intelligence Agency spy game: flash it, then open the link it prints (or http://sia.local)
+spy:
+	$(MAKE) --no-print-directory flash SKETCH=firmware/sia_spy

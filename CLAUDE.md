@@ -1,9 +1,28 @@
-# AI petbot
+# SIA — Secret Intelligence Agency
 
-Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device TinyML
-(vision, sound, motion).
+Spy game firmware for the **Seeed XIAO ESP32S3 Sense** (XIAOML Kit), forked from **AI petbot**
+(github.com/604Security/ai-petbot) on 2026-09-30. Everything below "SIA game" is inherited from petbot
+and still applies (hardware, toolchain, gotchas).
 
-## Project
+## SIA game
+
+- **Name:** always "SIA — Secret Intelligence Agency" in the app and code. Keep wording simple and clear for kids.
+- **Agents:** `megaspy` (unicorn theme mode: pink/purple UI, unicorn in spy shades on the OLED) and `spyhunter`
+  (classic spy: green/cyan UI, spy in a fedora on the OLED).
+- **Firmware:** `firmware/sia_spy/` (`make spy`). One sketch: `sia_spy.ino` (game, gadgets, HTTP API),
+  `page.h` (the whole web app), `spy_art.h` (OLED mascots, generated).
+- **Art:** `python3 spy_art.py` previews; `python3 spy_art.py h > spy_art.h` and `python3 spy_art.py page`
+  regenerate the OLED header and the page copy. Built on `unicorn.py` (the petbot unicorn).
+- **Storage:** points per agent in Preferences (namespace `sia`, key = agent id, plus `case` counter);
+  evidence photos `/sia/case_NNNN_k.jpg` and the log `/sia/log.txt` on the SD card.
+  SD shares GPIO21 with the LED, so every SD access goes through `sdOpen()`/`sdClose()` (mutex, LED paused).
+- **Time:** NTP with Vancouver time zone (`PST8PDT`), used in case-file timestamps.
+- **Tuning (measured 2026-09-30):** room noise median ~40 RMS, clicks spike to ~900. Ghost Walk resets only on
+  >250 RMS for 2+ windows (0.1 s). Trap sensitivity 1..10 maps to thresholds 3000..80 (7 = 267; a laptop beep hit 273).
+- **Testing tip:** `?agent=<id>` in the URL logs in without the login screen (also handy for headless screenshots:
+  use a tall window, 900x1250; at 900x700 headless Chrome paints a dark band over the header).
+
+## Hardware project (inherited from AI petbot)
 
 - **Goal:** a pet-aware bot. First a **wake word ("Jasmin")**, then **computer vision** to find the pet.
 - **Plan:** follow the mlsysbook.ai XIAO labs, re-themed for petbot. See **[ROADMAP.md](ROADMAP.md)**.
@@ -106,14 +125,21 @@ Pet robot project built on the **Seeed XIAO ESP32S3 Sense**, using on-device Tin
 
 ## Repo conventions
 
-- Firmware sketches live in `firmware/<phase>/<sketch>/<sketch>.ino`.
+- Firmware sketches live in `firmware/<name>/<name>.ino` (`sia_spy`, `petbot_test`, `phase0/*`).
 - Wi-Fi credentials go in a per-sketch `secrets.h` (gitignored); copy it from `secrets.h.example`.
 - Installers/tooling live in `~/tools/`, not in this repo (see `.gitignore`).
 - Keep the "Status / next steps" section below current at the end of each session.
 
 ## Status / next steps
 
-Current phase: **Phase 1 — wake word** (see ROADMAP.md). Phase 0 done 2026-09-28.
+**SIA:** v1 working on hardware 2026-09-30: all 6 missions, gadgets, sound trap (3-photo burst), case files,
+per-agent OLED mascots. Both agents reset to 0 points after testing. Test photos (cases 1-2) and log lines from
+2026-09-30 are on the SD card.
+
+Ideas next: IMU "don't move the case" mission (tilt alarm), Phase 2 pet/person detection to confirm Evidence Hunt
+targets, a hidden HQ page for spyhunter (reset points, add missions).
+
+Inherited petbot status: **Phase 1 — wake word** (see ROADMAP.md). Phase 0 done 2026-09-28.
 
 - [x] Decide goals: wake word first, then vision
 - [x] Wake word: "Jasmin"
