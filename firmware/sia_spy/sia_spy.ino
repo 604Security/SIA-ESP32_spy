@@ -521,6 +521,50 @@ void drawCentered(const char* s, int y) {
   u8g2.drawStr(PX + (PW - w) / 2, y, s);
 }
 
+// Idle screen (picked from design/oled-options.html, #17): secret-code letters rain down 12 columns
+// behind a flashing badge that shows "SIA", and every few seconds who's logged in.
+uint32_t mix(uint32_t x) {  // small integer hash, for picking letters
+  x ^= x >> 16; x *= 0x7feb352d; x ^= x >> 15; x *= 0x846ca68b; x ^= x >> 16;
+  return x;
+}
+
+void drawCodeRain(unsigned long now) {
+  static float y[12], speed[12];
+  static bool started = false;
+  if (!started) {
+    for (int i = 0; i < 12; i++) {
+      y[i] = random(0, 48);
+      speed[i] = 0.25f + random(0, 50) / 100.0f;
+    }
+    started = true;
+  }
+  u8g2.setFont(u8g2_font_4x6_tr);
+  char c[2] = {0, 0};
+  for (int i = 0; i < 12; i++) {
+    y[i] += speed[i];
+    if (y[i] >= 48) y[i] -= 48;
+    for (int k = 0; k < 2; k++) {  // a letter and its trail; each changes every 0.4 s
+      c[0] = 'A' + mix(i * 31 + (now + k * 400) / 400) % 26;
+      u8g2.drawStr(i * 6 + 1, (int)y[i] - 8 - k * 7 + 5, c);
+    }
+  }
+  if ((now / 700) % 3) {  // the badge flashes
+    bool showName = now % 9000 >= 6000;
+    int bx = showName ? 14 : 19, bw = showName ? 44 : 34;
+    u8g2.setDrawColor(0);
+    u8g2.drawBox(bx, 12, bw, 16);
+    u8g2.setDrawColor(1);
+    u8g2.drawFrame(bx, 12, bw, 16);
+    if (showName) {
+      u8g2.setFont(u8g2_font_5x8_tr);
+      u8g2.drawStr(36 - u8g2.getStrWidth(AGENT_IDS[activeAgent]) / 2, 23, AGENT_IDS[activeAgent]);
+    } else {
+      u8g2.setFont(u8g2_font_7x13B_tr);
+      u8g2.drawStr(36 - u8g2.getStrWidth("SIA") / 2, 25, "SIA");
+    }
+  }
+}
+
 void updateScreen() {
   static unsigned long last = 0;
   unsigned long now = millis();
@@ -543,9 +587,17 @@ void updateScreen() {
     return;
   }
 
-  // mascot of the logged-in agent, with a lens glint sweeping by now and then
+  bool busy = now < rewardUntil || now < snapUntil || now < messageUntil || lampActive || trapArmed ||
+              (mission.id == M_GHOST && !mission.done) || mission.id == M_EVIDENCE;
+  if (!busy) {
+    drawCodeRain(now);
+    u8g2.sendBuffer();
+    return;
+  }
+
+  // mascot of the logged-in agent: megaspy's ninja mask tails flutter, spyhunter's shades glint now and then
   int phase = (now / 150) % 20;
-  int frame = phase < 4 ? phase : 0;
+  int frame = activeAgent == 0 ? (now / 200) % 4 : (phase < 4 ? phase : 0);
   u8g2.drawXBMP(0, 0, SPY_ART_W, SPY_ART_H, activeAgent == 0 ? UNICORN_SPY[frame] : AGENT_SPY[frame]);
 
   char buf[16];
@@ -592,7 +644,7 @@ void updateScreen() {
       if (s.symbol == '-') u8g2.drawBox(46, 32, 16, 4);
       else u8g2.drawDisc(54, 34, 2);
     }
-  } else if (trapArmed) {
+  } else {  // trap armed
     u8g2.setFont(u8g2_font_5x8_tr);
     drawCentered("TRAP", 8);
     unsigned long armedFor = now - trapArmedAt;
@@ -609,13 +661,6 @@ void updateScreen() {
       int tx = 40 + (int)(28 * min(thr, 1.0f));
       u8g2.drawVLine(tx, 24, 12);
     }
-  } else {
-    u8g2.setFont(u8g2_font_helvB10_tr);
-    drawCentered("SIA", 13);
-    u8g2.setFont(u8g2_font_4x6_tr);
-    drawCentered(AGENT_IDS[activeAgent], 23);
-    snprintf(buf, sizeof(buf), "%lu pts", (unsigned long)agents[activeAgent].points);
-    drawCentered(buf, 33);
   }
   u8g2.sendBuffer();
 }

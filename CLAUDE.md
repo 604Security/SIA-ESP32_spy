@@ -11,8 +11,13 @@ and still applies (hardware, toolchain, gotchas).
   (classic spy: green/cyan UI, spy in a fedora on the OLED).
 - **Firmware:** `firmware/sia_spy/` (`make spy`). One sketch: `sia_spy.ino` (game, gadgets, HTTP API),
   `page.h` (the whole web app), `spy_art.h` (OLED mascots, generated).
+- **Look (picked 2026-09-30 from the numbered options pages in `design/`, see `design/README.md`):**
+  HQ = Night-Vision Cam, login = fingerprint scanner (hold 1.5 s), OLED idle = code rain with a flashing
+  SIA / agent-name badge, mascots = megaspy in a ninja mask (tails flutter), spyhunter in a tuxedo + top hat.
+  For new design choices, make a numbered options page of live previews in `design/`; the user likes picking that way.
 - **Art:** `python3 spy_art.py` previews; `python3 spy_art.py h > spy_art.h` and `python3 spy_art.py page`
-  regenerate the OLED header and the page copy. Built on `unicorn.py` (the petbot unicorn).
+  regenerate the OLED header and the page copy. Mascots come from `outfits.py` (10 outfits per agent),
+  built on `unicorn.py` (the petbot unicorn).
 - **Storage:** points per agent in Preferences (namespace `sia`, key = agent id, plus `case` counter);
   evidence photos `/sia/case_NNNN_k.jpg` and the log `/sia/log.txt` on the SD card.
   SD shares GPIO21 with the LED, so every SD access goes through `sdOpen()`/`sdClose()` (mutex, LED paused).

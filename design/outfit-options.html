@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIA mascots · 10 outfits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07090D; --panel:#10151D; --line:#253245; --ink:#EAF2FB; --muted:#93A7BC; --pink:#FF5FA2; --green:#39FF9E}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:"Fredoka",system-ui,sans-serif}
+.top{max-width:1320px; margin:0 auto; padding:24px 16px 6px}
+.top h1{margin:0; font-family:"Special Elite",monospace; font-weight:400; font-size:34px}
+.top p{margin:4px 0 0; color:var(--muted); font-size:17px; max-width:860px}
+.grid{max-width:1320px; margin:0 auto; padding:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(560px,1fr)); gap:20px}
+@media (max-width:600px){ .grid{grid-template-columns:1fr} .pair{grid-template-columns:1fr} }
+.tile{background:var(--panel); border:2px solid var(--line); border-radius:22px; padding:14px}
+.tile header{display:flex; gap:12px; align-items:flex-start; margin-bottom:12px}
+.num{flex:none; width:42px; height:42px; border-radius:50%; background:var(--pink); color:#10040A; display:grid; place-items:center; font-weight:700; font-size:21px}
+.tile h2{margin:0; font-size:20px}
+.tile p{margin:2px 0 0; color:var(--muted); font-size:14px}
+.pair{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.who{font-size:13px; color:var(--muted); text-align:center; margin-top:6px}
+.who b{color:var(--ink)}
+.views{display:flex; gap:8px; justify-content:center}
+.oled{background:#010203; border-radius:8px; padding:6px; box-shadow:inset 0 0 0 2px #1E242C}
+canvas{display:block; image-rendering:pixelated; width:108px; height:120px}
+.web{background:#0B1019; border-radius:8px; padding:6px; border:1px solid var(--line)}
+footer{max-width:1320px; margin:0 auto; padding:10px 16px 40px; color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>🦄🕵️ Mascot outfits: 10 looks</h1>
+  <p>Each outfit is real 36×40 pixel art. You see it as petbot's white OLED shows it, and in colour as the web page shows it.
+    You can pick a different outfit for megaspy and for spyhunter, or pick a few and they take turns.</p>
+</div>
+<div class="grid" id="grid"></div>
+<footer>Tell Claude your picks, for example "megaspy 3, spyhunter 7".</footer>
+<script>
+// ART-BEGIN
+const OUTFITS = [
+  {id:'shades', name:'Classic shades', desc:"Just the dark spy sunglasses (megaspy's look now; spyhunter's current look is #2).", megaspy:['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc0180','03dfe0260','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'], spyhunter:['000000000','000000000','000000000','000000000','000000000','000000000','000060000','0001fc000','0005fe000','000dff000','001c67800','0019f9800','001bfd800','0037fec00','003fffc00','003861c00','001861800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']},
+  {id:'fedora', name:'Fedora & shades', desc:'A classic spy hat, tilted just so.', megaspy:['000000000','000040000','0003c0010','001fe0030','001fe0060','001fe00c0','001fc0040','001c00380','00001e700','0000f8f00','0007c5c00','007e4f800','01e3ffe00','011ff8f00','00ff20780','03dfc0180','03dfe0260','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'], spyhunter:['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','001861800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']},
+  {id:'goggles', name:'Night-vision goggles', desc:'Tube goggles for seeing in the dark (matches the Night-Vision HQ).', megaspy:['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01ffe0000','01fc00080','03df80140','03dfe0140','07fee0058','07bde009c','07fce003e','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'], spyhunter:['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','00070e000','000891000','000891000','00070e000','000fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']},
+  {id:'earpiece', name:'Secret earpiece', desc:'Shades plus a coiled earpiece wire: listening to HQ.', megaspy:['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03df40180','03de20260','07fe203f8','07bda07fc','07fc78ffe','077cbfffe','0ef8bfffe','0ef87ffe7','0df83ffff','0df97fffe','1df1bfffe','1df1bfcee','1df17ef1c','1df1be7f8','3de17e0c0','3de1bf000','3de13f000','3fe17f000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'], spyhunter:['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','000061800','000061800','000cf3800','001fff800','001fff800','001fff800','000fff800','000f07800','000fffc00','002fffc00','002fffc00','0069f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']},
+  {id:'disguise', name:'Disguise kit', desc:'Round glasses and a fake mustache. Nobody will ever know!', megaspy:['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01fff0780','03dfe4380','03dfe0060','07fee03f8','07bdf07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87fe03','0df9ffc00','1df1ffc00','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'], spyhunter:['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000cf3000','001b6d800','00179e800','00179e800','001b6d800','001fdf800','001fff800','001e07800','000c01800','001fff800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']},
+  {id:'ninja', name:'Ninja mask', desc:"A black mask band, and the unicorn's mask tails flutter over her mane.", megaspy:['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','010700000','000000000','03800e000','03d80e000','07e006008','07010000c','070c0000e','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'], spyhunter:['000000000','000000000','000000000','000000000','000000000','0001f8000','0003fc000','0007ff000','000fff000','001fff800','001fffc00','003fffc00','003fffc00','003fffc00','003fffe00','006fff600','002c71600','002cf3400','002fff400','003fffc00','001fffc00','001fff800','001fff800','001fff800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']},
+  {id:'tuxedo', name:'Tuxedo', desc:'Bow tie and shades for fancy undercover parties (top hat for spyhunter).', megaspy:['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc0180','03dfe0260','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de17e000','3fe0cb000','7bc000000','7fc000000','77c27e000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'], spyhunter:['003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','000000000','000000000','001fff800','03fffffc0','03fffffc0','01fffff80','000fff000','000fff000','001861800','001861800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff000','000f07000','0007fe000','0003fc000','0007fe000','0039f9c00','00fcf1f00','01fc23f80','03fe23fc0','03ff0ffc0','03ff9ffc0','07ffdffe0','07fffffe0','07fffffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']},
+  {id:'detective', name:'Detective', desc:'Deerstalker hat and a monocle, like a famous detective.', megaspy:['000000000','000000000','000020010','0007f0030','0007f0060','0017b00c0','0017b8040','003fb8380','006fb2700','006c18f00','0007cdc00','033fcf800','003fffe00','01fff8700','01fff0380','03dff4380','03dfe03e0','07fef03f8','07bdf07fc','07fcf8ffe','077cffffe','0ef8fbffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1fbcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'], spyhunter:['000000000','000000000','0001f8000','0007fe000','000fff000','001fff800','003fffc00','003fffc00','007fffe00','007fffe00','007f9fe00','01e3fc780','0067fe600','000fff000','000fff000','001ff1800','0018e0800','0018e0800','001ff0800','001fff800','001fff000','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']},
+  {id:'headset', name:'Mission control headset', desc:'Headphones and a boom mic for talking to HQ.', megaspy:['000000000','000000000','000000010','000000030','000040060','0000400c0','000400040','001ce0380','003df0700','007bd0f00','007bc9c00','00fbcb800','01ffffe00','01fff8f00','01ff20780','03de00180','03de00260','07fe003f8','07bc207fc','07fcd8ffe','077cffffe','0ef8efffe','0ef877fe7','0df87bfff','0df9fdffe','1df1ff27e','1df1ffc6e','1df1fee1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'], spyhunter:['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003e07c00','000000000','0067fe600','0fcfff3f0','0fdfffbf0','0fbfffdf0','000fff000','000fff000','000861800','000061800','000061800','000cf3800','000fff800','0007ff800','0017ff800','0003ff800','001c07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']},
+  {id:'beret', name:'Undercover in Paris', desc:'A beret, and a striped scarf for the spy.', megaspy:['000000000','000000000','000000010','000300030','000200060','0007f00c0','003ffc040','00fffc380','01fff8700','01fff0f00','01ffcdc00','007e0f800','0181ffe00','01fff8f00','01ff20780','03dfc0180','03dfe0260','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de005000','3de000000','3fe000000','7bc1fe000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'], spyhunter:['000000000','000000000','000020000','000020000','000020000','0003fc000','003fffc00','007fffe00','007fffe00','007fffe00','003fffc00','0007fe000','00070e000','000fff000','000fff000','001861800','001861800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fff800','001fff800','003dfbc00','0070f0600','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']}];
+// ART-END
+const bits = rows => rows.map(h => parseInt(h, 16).toString(2).padStart(36, '0'));
+function paint(cv, rows, color, rounded) {
+  const g = cv.getContext('2d'), px = cv.width / 36;
+  g.fillStyle = color;
+  bits(rows).forEach((row, y) => { for (let x = 0; x < 36; x++) if (row[x] === '1') {
+    if (rounded) { g.beginPath(); g.roundRect(x * px + .4, y * px + .4, px - .8, px - .8, px / 4); g.fill(); }
+    else g.fillRect(x * px, y * px, px - .5, px - .5);
+  } });
+}
+OUTFITS.forEach((o, i) => {
+  const el = document.createElement('section');
+  el.className = 'tile';
+  el.innerHTML = `<header><span class="num">${i + 1}</span><div><h2>${o.name}</h2><p>${o.desc}</p></div></header>
+    <div class="pair">${['megaspy', 'spyhunter'].map(a => `<div><div class="views">
+      <div class="oled"><canvas data-a="${a}" data-k="oled" width="144" height="160"></canvas></div>
+      <div class="web"><canvas data-a="${a}" data-k="web" width="144" height="160"></canvas></div></div>
+      <div class="who"><b>${a}</b> · screen / web</div></div>`).join('')}</div>`;
+  document.getElementById('grid').appendChild(el);
+  el.querySelectorAll('canvas').forEach(cv => {
+    const a = cv.dataset.a, oled = cv.dataset.k === 'oled';
+    paint(cv, o[a], oled ? '#E4F4FF' : (a === 'megaspy' ? '#FF5FA2' : '#39FF9E'), !oled);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIA OLED · 20 screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Special+Elite&family=Silkscreen:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07090D; --panel:#10151D; --line:#253245; --ink:#EAF2FB; --muted:#93A7BC; --acc:#FF5FA2}
+body[data-agent="spyhunter"]{--acc:#39FF9E}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:"Fredoka",system-ui,sans-serif}
+.top{max-width:1320px; margin:0 auto; padding:24px 16px 6px; display:flex; flex-wrap:wrap; gap:16px; align-items:end; justify-content:space-between}
+.top h1{margin:0; font-family:"Special Elite",monospace; font-weight:400; font-size:34px}
+.top p{margin:4px 0 0; color:var(--muted); font-size:17px; max-width:760px}
+.controls{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.toggle{display:flex; gap:6px; background:var(--panel); border:2px solid var(--line); border-radius:999px; padding:5px}
+.controls button{font:inherit; font-weight:700; font-size:16px; border:0; border-radius:999px; padding:8px 16px; cursor:pointer; background:transparent; color:var(--muted)}
+.controls button.on{background:var(--acc); color:#10040A}
+.clap{background:var(--panel)!important; color:var(--ink)!important; border:2px solid var(--acc)!important}
+.grid{max-width:1320px; margin:0 auto; padding:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:18px}
+.tile{background:var(--panel); border:2px solid var(--line); border-radius:20px; padding:14px; display:flex; flex-direction:column; gap:10px}
+.tile header{display:flex; gap:10px; align-items:flex-start}
+.num{flex:none; width:40px; height:40px; border-radius:50%; background:var(--acc); color:#10040A; display:grid; place-items:center; font-weight:700; font-size:19px}
+.tile h2{margin:0; font-size:19px}
+.tile p{margin:2px 0 0; color:var(--muted); font-size:14px; line-height:1.35}
+.tag{display:inline-block; margin-top:4px; font-size:12px; padding:1px 8px; border-radius:999px; background:#1A2433; color:var(--muted)}
+/* the XIAOML Kit OLED module */
+.module{background:linear-gradient(145deg,#12161C,#050608); border-radius:12px; padding:14px; box-shadow:inset 0 0 0 2px #1E242C}
+.module canvas{display:block; width:100%; aspect-ratio:72/40; background:#010203; border-radius:4px; image-rendering:pixelated;
+  box-shadow:0 0 0 3px #000, inset 0 0 20px rgba(0,0,0,.8)}
+footer{max-width:1320px; margin:0 auto; padding:10px 16px 40px; color:var(--muted); font-size:16px}
+</style>
+</head>
+<body data-agent="megaspy">
+<div class="top">
+  <div>
+    <h1>📟 petbot's screen: 20 ideas</h1>
+    <p>Each tile is a pixel-accurate simulation of the real 72×40 one-colour OLED. You can pick several:
+      petbot can rotate through your favourites, and alerts and missions still take over when they happen.</p>
+  </div>
+  <div class="controls">
+    <div class="toggle"><button class="on" data-agent="megaspy">🦄 megaspy</button><button data-agent="spyhunter">🕵️ spyhunter</button></div>
+    <button class="clap" id="clap">👏 Clap (make noise)</button>
+  </div>
+</div>
+<div class="grid" id="grid"></div>
+<footer>Tell Claude the numbers you like (for example "3, 13 and 18"), and whether petbot should rotate between them.</footer>
+
+<script>
+// ART-BEGIN
+const UNICORN_SPY = [['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc8180','03dfe4260','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'],
+  ['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc4180','03dfe2260','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'],
+  ['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc2180','03dfe1260','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'],
+  ['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc1180','03dfe0a60','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800']];
+const AGENT_SPY = [['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','001c71800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8'],
+  ['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','001c71800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8'],
+  ['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','001a69800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8'],
+  ['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','001a69800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']];
+// ART-END
+// Real X11 misc-fixed bitmap fonts (the same ones U8g2 ships: 4x6, 5x8, 6x10, 7x13B, 10x20)
+const FONTS = {"f4x6":{"w":4,"h":6,"g":{" ":[0,0,0,0,0,0],"!":[4,4,4,0,4,0],"\"":[10,10,0,0,0,0],"#":[10,15,10,15,10,0],"$":[4,14,12,2,14,4],"%":[8,2,4,8,2,0],"&":[4,10,4,10,5,0],"'":[4,4,0,0,0,0],"(":[2,4,4,4,4,2],")":[8,4,4,4,4,8],"*":[10,4,14,4,10,0],"+":[4,4,14,4,4,0],",":[0,0,0,0,4,8],"-":[0,0,14,0,0,0],".":[0,0,0,0,4,0],"/":[2,2,4,8,8,0],"0":[4,10,14,10,4,0],"1":[4,12,4,4,14,0],"2":[4,10,2,4,14,0],"3":[14,2,4,2,12,0],"4":[10,10,14,2,2,0],"5":[14,8,12,2,12,0],"6":[6,8,12,10,4,0],"7":[14,2,4,8,8,0],"8":[6,10,4,10,12,0],"9":[4,10,6,2,12,0],":":[0,4,0,0,4,0],";":[0,4,0,0,4,8],"<":[2,4,8,4,2,0],"=":[0,14,0,14,0,0],">":[8,4,2,4,8,0],"?":[12,2,4,0,4,0],"@":[6,10,10,8,6,0],"A":[4,10,14,10,10,0],"B":[12,10,12,10,12,0],"C":[4,10,8,10,4,0],"D":[12,10,10,10,12,0],"E":[14,8,12,8,14,0],"F":[14,8,12,8,8,0],"G":[6,8,10,10,6,0],"H":[10,10,14,10,10,0],"I":[14,4,4,4,14,0],"J":[2,2,2,10,4,0],"K":[10,10,12,10,10,0],"L":[8,8,8,8,14,0],"M":[10,14,14,10,10,0],"N":[2,10,14,10,8,0],"O":[4,10,10,10,4,0],"P":[12,10,12,8,8,0],"Q":[4,10,10,10,4,2],"R":[12,10,12,10,10,0],"S":[6,8,4,2,12,0],"T":[14,4,4,4,4,0],"U":[10,10,10,10,14,0],"V":[10,10,10,14,4,0],"W":[10,10,14,14,10,0],"X":[10,10,4,10,10,0],"Y":[10,10,4,4,4,0],"Z":[14,2,4,8,14,0],"[":[6,4,4,4,6,0],"\\":[8,8,4,2,2,0],"]":[12,4,4,4,12,0],"^":[4,10,0,0,0,0],"_":[0,0,0,0,0,14],"`":[4,2,0,0,0,0],"a":[0,6,10,10,6,0],"b":[8,12,10,10,12,0],"c":[0,6,8,8,6,0],"d":[2,6,10,10,6,0],"e":[0,4,10,12,6,0],"f":[2,4,14,4,4,0],"g":[0,6,10,6,2,12],"h":[8,12,10,10,10,0],"i":[4,0,12,4,14,0],"j":[2,0,2,2,2,12],"k":[8,10,12,10,10,0],"l":[12,4,4,4,14,0],"m":[0,10,14,10,10,0],"n":[0,12,10,10,10,0],"o":[0,4,10,10,4,0],"p":[0,12,10,12,8,8],"q":[0,6,10,10,6,2],"r":[0,10,12,8,8,0],"s":[0,6,12,2,12,0],"t":[4,14,4,4,2,0],"u":[0,10,10,10,6,0],"v":[0,10,10,10,4,0],"w":[0,10,10,14,10,0],"x":[0,10,4,4,10,0],"y":[0,10,10,6,2,12],"z":[0,14,2,4,14,0],"{":[2,4,12,4,4,2],"|":[4,4,4,4,4,0],"}":[8,4,6,4,4,8],"~":[5,10,0,0,0,0]}},"f5x8":{"w":5,"h":8,"g":{" ":[0,0,0,0,0,0,0,0],"!":[0,4,4,4,4,0,4,0],"\"":[0,10,10,10,0,0,0,0],"#":[10,10,31,10,31,10,10,0],"$":[4,14,20,14,5,14,4,0],"%":[0,8,10,4,10,2,0,0],"&":[8,20,20,8,20,20,10,0],"'":[0,4,4,4,0,0,0,0],"(":[0,4,8,8,8,8,4,0],")":[0,8,4,4,4,4,8,0],"*":[0,0,18,12,30,12,18,0],"+":[0,0,4,4,31,4,4,0],",":[0,0,0,0,0,6,4,8],"-":[0,0,0,0,30,0,0,0],".":[0,0,0,0,0,4,14,4],"/":[0,2,2,4,8,16,16,0],"0":[0,4,10,10,10,10,4,0],"1":[0,4,12,4,4,4,14,0],"2":[0,12,18,2,12,16,30,0],"3":[0,30,4,12,2,18,12,0],"4":[0,4,12,20,30,4,4,0],"5":[0,30,16,28,2,18,12,0],"6":[0,12,16,28,18,18,12,0],"7":[0,30,2,4,4,8,8,0],"8":[0,12,18,12,18,18,12,0],"9":[0,12,18,18,14,2,12,0],":":[0,0,12,12,0,12,12,0],";":[0,0,6,6,0,6,4,8],"<":[0,2,4,8,8,4,2,0],"=":[0,0,0,30,0,30,0,0],">":[0,8,4,2,2,4,8,0],"?":[0,4,10,2,4,0,4,0],"@":[6,9,19,21,21,18,8,6],"A":[0,12,18,18,30,18,18,0],"B":[0,28,18,28,18,18,28,0],"C":[0,12,18,16,16,18,12,0],"D":[0,28,18,18,18,18,28,0],"E":[0,30,16,28,16,16,30,0],"F":[0,30,16,28,16,16,16,0],"G":[0,12,18,16,22,18,12,0],"H":[0,18,18,30,18,18,18,0],"I":[0,14,4,4,4,4,14,0],"J":[0,14,4,4,4,20,8,0],"K":[0,18,20,24,20,20,18,0],"L":[0,16,16,16,16,16,30,0],"M":[0,18,30,30,18,18,18,0],"N":[0,18,26,30,22,22,18,0],"O":[0,12,18,18,18,18,12,0],"P":[0,28,18,18,28,16,16,0],"Q":[0,12,18,18,26,22,12,2],"R":[0,28,18,18,28,18,18,0],"S":[0,12,18,8,4,18,12,0],"T":[0,14,4,4,4,4,4,0],"U":[0,18,18,18,18,18,12,0],"V":[0,18,18,18,18,12,12,0],"W":[0,18,18,18,30,30,18,0],"X":[0,18,18,12,12,18,18,0],"Y":[0,17,17,10,4,4,4,0],"Z":[0,30,2,4,8,16,30,0],"[":[0,14,8,8,8,8,14,0],"\\":[0,16,16,8,4,2,2,0],"]":[0,14,2,2,2,2,14,0],"^":[0,4,10,0,0,0,0,0],"_":[0,0,0,0,0,0,0,30],"`":[0,8,4,0,0,0,0,0],"a":[0,0,0,14,18,18,14,0],"b":[0,16,16,28,18,18,28,0],"c":[0,0,0,6,8,8,6,0],"d":[0,2,2,14,18,18,14,0],"e":[0,0,0,12,22,24,12,0],"f":[0,4,10,8,28,8,8,0],"g":[0,0,0,12,18,14,2,12],"h":[0,16,16,28,18,18,18,0],"i":[0,4,0,12,4,4,14,0],"j":[0,2,0,2,2,2,10,4],"k":[0,16,16,18,28,18,18,0],"l":[0,12,4,4,4,4,14,0],"m":[0,0,0,26,21,21,21,0],"n":[0,0,0,28,18,18,18,0],"o":[0,0,0,12,18,18,12,0],"p":[0,0,0,28,18,28,16,16],"q":[0,0,0,14,18,14,2,2],"r":[0,0,0,20,26,16,16,0],"s":[0,0,0,6,12,2,12,0],"t":[0,8,8,28,8,10,4,0],"u":[0,0,0,18,18,18,14,0],"v":[0,0,0,10,10,10,4,0],"w":[0,0,0,17,21,21,10,0],"x":[0,0,0,18,12,12,18,0],"y":[0,0,0,18,18,14,18,12],"z":[0,0,0,30,4,8,30,0],"{":[6,8,4,24,4,8,6,0],"|":[0,4,4,4,4,4,4,0],"}":[24,4,8,6,8,4,24,0],"~":[0,10,20,0,0,0,0,0]}},"f6x10":{"w":6,"h":10,"g":{" ":[0,0,0,0,0,0,0,0,0,0],"!":[0,8,8,8,8,8,0,8,0,0],"\"":[0,20,20,20,0,0,0,0,0,0],"#":[0,20,20,62,20,62,20,20,0,0],"$":[0,8,28,40,28,10,28,8,0,0],"%":[0,18,42,20,8,20,42,36,0,0],"&":[0,16,40,40,16,42,36,26,0,0],"'":[0,8,8,8,0,0,0,0,0,0],"(":[0,4,8,16,16,16,8,4,0,0],")":[0,16,8,4,4,4,8,16,0,0],"*":[0,0,34,20,62,20,34,0,0,0],"+":[0,0,8,8,62,8,8,0,0,0],",":[0,0,0,0,0,0,12,8,16,0],"-":[0,0,0,0,62,0,0,0,0,0],".":[0,0,0,0,0,0,8,28,8,0],"/":[0,2,2,4,8,16,32,32,0,0],"0":[0,8,20,34,34,34,20,8,0,0],"1":[0,8,24,40,8,8,8,62,0,0],"2":[0,28,34,2,12,16,32,62,0,0],"3":[0,62,2,4,12,2,34,28,0,0],"4":[0,4,12,20,36,62,4,4,0,0],"5":[0,62,32,44,50,2,34,28,0,0],"6":[0,12,16,32,44,50,34,28,0,0],"7":[0,62,2,4,4,8,16,16,0,0],"8":[0,28,34,34,28,34,34,28,0,0],"9":[0,28,34,38,26,2,4,24,0,0],":":[0,0,8,28,8,0,8,28,8,0],";":[0,0,8,28,8,0,12,8,16,0],"<":[0,2,4,8,16,8,4,2,0,0],"=":[0,0,0,62,0,62,0,0,0,0],">":[0,16,8,4,2,4,8,16,0,0],"?":[0,28,34,4,8,8,0,8,0,0],"@":[0,28,34,38,42,44,32,28,0,0],"A":[0,8,20,34,34,62,34,34,0,0],"B":[0,60,18,18,28,18,18,60,0,0],"C":[0,28,34,32,32,32,34,28,0,0],"D":[0,60,18,18,18,18,18,60,0,0],"E":[0,62,32,32,60,32,32,62,0,0],"F":[0,62,32,32,60,32,32,32,0,0],"G":[0,28,34,32,32,38,34,28,0,0],"H":[0,34,34,34,62,34,34,34,0,0],"I":[0,28,8,8,8,8,8,28,0,0],"J":[0,14,4,4,4,4,36,24,0,0],"K":[0,34,36,40,48,40,36,34,0,0],"L":[0,32,32,32,32,32,32,62,0,0],"M":[0,34,34,54,42,34,34,34,0,0],"N":[0,34,34,50,42,38,34,34,0,0],"O":[0,28,34,34,34,34,34,28,0,0],"P":[0,60,34,34,60,32,32,32,0,0],"Q":[0,28,34,34,34,34,42,28,2,0],"R":[0,60,34,34,60,40,36,34,0,0],"S":[0,28,34,32,28,2,34,28,0,0],"T":[0,62,8,8,8,8,8,8,0,0],"U":[0,34,34,34,34,34,34,28,0,0],"V":[0,34,34,34,20,20,20,8,0,0],"W":[0,34,34,34,42,42,54,34,0,0],"X":[0,34,34,20,8,20,34,34,0,0],"Y":[0,34,34,20,8,8,8,8,0,0],"Z":[0,62,2,4,8,16,32,62,0,0],"[":[0,28,16,16,16,16,16,28,0,0],"\\":[0,32,32,16,8,4,2,2,0,0],"]":[0,28,4,4,4,4,4,28,0,0],"^":[0,8,20,34,0,0,0,0,0,0],"_":[0,0,0,0,0,0,0,0,62,0],"`":[8,4,0,0,0,0,0,0,0,0],"a":[0,0,0,28,2,30,34,30,0,0],"b":[0,32,32,44,50,34,50,44,0,0],"c":[0,0,0,28,34,32,34,28,0,0],"d":[0,2,2,26,38,34,38,26,0,0],"e":[0,0,0,28,34,62,32,28,0,0],"f":[0,12,18,16,60,16,16,16,0,0],"g":[0,0,0,30,34,34,30,2,34,28],"h":[0,32,32,44,50,34,34,34,0,0],"i":[0,8,0,24,8,8,8,28,0,0],"j":[0,2,0,6,2,2,2,18,18,12],"k":[0,32,32,34,36,56,36,34,0,0],"l":[0,24,8,8,8,8,8,28,0,0],"m":[0,0,0,52,42,42,42,34,0,0],"n":[0,0,0,44,50,34,34,34,0,0],"o":[0,0,0,28,34,34,34,28,0,0],"p":[0,0,0,44,50,34,50,44,32,32],"q":[0,0,0,26,38,34,38,26,2,2],"r":[0,0,0,44,50,32,32,32,0,0],"s":[0,0,0,28,32,28,2,60,0,0],"t":[0,16,16,60,16,16,18,12,0,0],"u":[0,0,0,34,34,34,38,26,0,0],"v":[0,0,0,34,34,20,20,8,0,0],"w":[0,0,0,34,34,42,42,20,0,0],"x":[0,0,0,34,20,8,20,34,0,0],"y":[0,0,0,34,34,38,26,2,34,28],"z":[0,0,0,62,4,8,16,62,0,0],"{":[0,6,8,4,24,4,8,6,0,0],"|":[0,8,8,8,8,8,8,8,0,0],"}":[0,24,4,8,6,8,4,24,0,0],"~":[0,18,42,36,0,0,0,0,0,0]}},"f7x13B":{"w":7,"h":12,"g":{" ":[0,0,0,0,0,0,0,0,0,0,0,0],"!":[0,24,24,24,24,24,24,0,24,24,0,0],"\"":[0,54,54,54,0,0,0,0,0,0,0,0],"#":[0,20,20,62,62,20,62,62,20,20,0,0],"$":[0,24,60,90,88,60,26,90,60,24,0,0],"%":[0,114,86,116,12,24,48,46,106,78,0,0],"&":[0,56,108,108,108,56,106,110,108,58,0,0],"'":[0,24,24,24,24,0,0,0,0,0,0,0],"(":[0,12,24,24,48,48,48,24,24,12,0,0],")":[0,48,24,24,12,12,12,24,24,48,0,0],"*":[0,0,0,36,24,126,126,24,36,0,0,0],"+":[0,0,0,24,24,126,126,24,24,0,0,0],",":[0,0,0,0,0,0,0,28,28,24,48,0],"-":[0,0,0,0,0,0,126,0,0,0,0,0],".":[0,0,0,0,0,0,0,0,24,60,24,0],"/":[0,6,6,12,12,24,48,48,96,96,0,0],"0":[0,24,36,102,102,102,102,102,36,24,0,0],"1":[0,24,56,88,24,24,24,24,24,126,0,0],"2":[0,60,102,102,6,28,48,96,96,126,0,0],"3":[0,126,6,12,24,60,6,6,102,60,0,0],"4":[0,6,14,30,54,102,102,126,6,6,0,0],"5":[0,126,96,96,124,102,6,6,102,60,0,0],"6":[0,60,102,96,96,124,102,102,102,60,0,0],"7":[0,126,6,6,12,12,24,24,48,48,0,0],"8":[0,60,102,102,102,60,102,102,102,60,0,0],"9":[0,60,102,102,102,62,6,6,102,60,0,0],":":[0,0,0,24,60,24,0,0,24,60,24,0],";":[0,0,0,24,60,24,0,28,28,24,48,0],"<":[0,6,12,24,48,96,48,24,12,6,0,0],"=":[0,0,0,0,126,0,0,126,0,0,0,0],">":[0,96,48,24,12,6,12,24,48,96,0,0],"?":[0,60,102,102,6,28,24,0,24,24,0,0],"@":[0,60,70,70,94,86,94,64,70,60,0,0],"A":[0,60,102,102,102,126,102,102,102,102,0,0],"B":[0,124,102,102,102,124,102,102,102,124,0,0],"C":[0,60,102,96,96,96,96,96,102,60,0,0],"D":[0,124,102,102,102,102,102,102,102,124,0,0],"E":[0,126,96,96,96,124,96,96,96,126,0,0],"F":[0,126,96,96,96,124,96,96,96,96,0,0],"G":[0,60,102,96,96,110,102,102,102,62,0,0],"H":[0,102,102,102,102,126,102,102,102,102,0,0],"I":[0,126,24,24,24,24,24,24,24,126,0,0],"J":[0,6,6,6,6,6,6,6,102,60,0,0],"K":[0,98,102,108,120,112,120,108,102,98,0,0],"L":[0,96,96,96,96,96,96,96,96,126,0,0],"M":[0,66,102,126,126,102,102,102,102,102,0,0],"N":[0,102,102,118,118,126,110,110,102,102,0,0],"O":[0,60,102,102,102,102,102,102,102,60,0,0],"P":[0,124,102,102,102,124,96,96,96,96,0,0],"Q":[0,60,102,102,102,102,102,118,110,60,6,0],"R":[0,124,102,102,102,124,120,108,102,98,0,0],"S":[0,60,102,96,96,60,6,6,102,60,0,0],"T":[0,126,24,24,24,24,24,24,24,24,0,0],"U":[0,102,102,102,102,102,102,102,102,60,0,0],"V":[0,102,102,102,36,36,60,24,24,24,0,0],"W":[0,102,102,102,102,102,126,126,102,66,0,0],"X":[0,66,102,36,60,24,60,36,102,66,0,0],"Y":[0,102,102,60,60,24,24,24,24,24,0,0],"Z":[0,126,6,6,12,24,48,96,96,126,0,0],"[":[0,60,48,48,48,48,48,48,48,60,0,0],"\\":[0,96,96,48,48,24,12,12,6,6,0,0],"]":[0,60,12,12,12,12,12,12,12,60,0,0],"^":[0,24,60,102,66,0,0,0,0,0,0,0],"_":[0,0,0,0,0,0,0,0,0,126,126,0],"`":[48,24,12,0,0,0,0,0,0,0,0,0],"a":[0,0,0,0,60,6,62,102,102,62,0,0],"b":[0,96,96,96,124,102,102,102,102,124,0,0],"c":[0,0,0,0,60,102,96,96,102,60,0,0],"d":[0,6,6,6,62,102,102,102,102,62,0,0],"e":[0,0,0,0,60,102,126,96,102,60,0,0],"f":[0,28,54,48,48,120,48,48,48,48,0,0],"g":[0,0,0,0,58,102,102,60,96,60,102,60],"h":[0,96,96,96,124,102,102,102,102,102,0,0],"i":[0,24,24,0,56,24,24,24,24,126,0,0],"j":[0,6,6,0,6,6,6,6,6,6,102,60],"k":[0,96,96,96,102,108,120,120,108,102,0,0],"l":[0,56,24,24,24,24,24,24,24,126,0,0],"m":[0,0,0,0,108,126,126,102,102,102,0,0],"n":[0,0,0,0,124,102,102,102,102,102,0,0],"o":[0,0,0,0,60,102,102,102,102,60,0,0],"p":[0,0,0,0,124,102,102,102,124,96,96,96],"q":[0,0,0,0,62,102,102,102,62,6,6,6],"r":[0,0,0,0,124,102,96,96,96,96,0,0],"s":[0,0,0,0,60,102,48,12,102,60,0,0],"t":[0,0,48,48,124,48,48,48,54,28,0,0],"u":[0,0,0,0,102,102,102,102,102,62,0,0],"v":[0,0,0,0,102,102,102,60,60,24,0,0],"w":[0,0,0,0,102,102,102,126,126,36,0,0],"x":[0,0,0,0,102,102,60,60,102,102,0,0],"y":[0,0,0,0,102,102,102,102,62,6,102,60],"z":[0,0,0,0,126,6,12,48,96,126,0,0],"{":[0,28,48,48,24,48,24,48,48,28,0,0],"|":[0,24,24,24,24,24,24,24,24,24,0,0],"}":[0,56,12,12,24,12,24,12,12,56,0,0],"~":[0,50,126,76,0,0,0,0,0,0,0,0]}},"f10x20":{"w":10,"h":17,"g":{" ":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"!":[48,48,48,48,48,48,48,48,48,48,0,48,48,0,0,0,0],"\"":[204,204,204,72,0,0,0,0,0,0,0,0,0,0,0,0,0],"#":[0,54,54,54,255,108,108,108,510,216,216,216,0,0,0,0,0],"$":[48,252,438,432,432,432,252,54,54,54,438,252,48,0,0,0,0],"%":[0,230,438,444,236,24,24,48,48,110,123,219,206,0,0,0,0],"&":[112,216,216,216,240,96,224,432,411,398,396,478,243,0,0,0,0],"'":[48,48,48,48,32,0,0,0,0,0,0,0,0,0,0,0,0],"(":[12,24,48,48,96,96,96,96,96,48,48,24,12,0,0,0,0],")":[192,96,48,48,24,24,24,24,24,48,48,96,192,0,0,0,0],"*":[0,0,0,204,204,120,510,120,204,204,0,0,0,0,0,0,0],"+":[0,0,0,48,48,48,510,48,48,48,0,0,0,0,0,0,0],",":[0,0,0,0,0,0,0,0,0,0,0,56,56,112,0,0,0],"-":[0,0,0,0,0,0,510,0,0,0,0,0,0,0,0,0,0],".":[0,0,0,0,0,0,0,0,0,0,56,56,56,0,0,0,0],"/":[0,6,6,12,12,24,24,48,48,96,96,192,192,0,0,0,0],"0":[48,120,204,204,390,390,390,390,390,204,204,120,48,0,0,0,0],"1":[48,112,240,432,48,48,48,48,48,48,48,48,510,0,0,0,0],"2":[120,204,390,390,6,6,12,56,96,192,384,384,510,0,0,0,0],"3":[120,204,390,390,6,12,56,12,6,390,390,204,120,0,0,0,0],"4":[4,12,28,60,108,204,396,396,510,12,12,12,12,0,0,0,0],"5":[510,384,384,384,384,440,460,6,6,6,390,204,120,0,0,0,0],"6":[120,204,388,384,384,440,460,390,390,390,390,204,120,0,0,0,0],"7":[510,6,6,12,12,24,24,48,48,96,96,192,192,0,0,0,0],"8":[120,204,390,390,390,204,120,204,390,390,390,204,120,0,0,0,0],"9":[120,204,390,390,390,390,206,118,6,6,134,204,120,0,0,0,0],":":[0,0,0,0,0,56,56,0,0,0,0,56,56,0,0,0,0],";":[0,0,0,0,0,56,56,0,0,0,0,56,56,112,0,0,0],"<":[4,12,24,48,96,192,384,192,96,48,24,12,4,0,0,0,0],"=":[0,0,0,0,510,0,0,0,0,510,0,0,0,0,0,0,0],">":[128,192,96,48,24,12,6,12,24,48,96,192,128,0,0,0,0],"?":[120,204,390,390,390,12,24,48,48,48,0,48,48,0,0,0,0],"@":[120,204,390,414,446,438,438,438,444,408,384,198,124,0,0,0,0],"A":[48,120,204,204,390,390,390,510,390,390,390,390,390,0,0,0,0],"B":[496,408,396,396,396,408,504,396,390,390,390,396,504,0,0,0,0],"C":[120,204,390,384,384,384,384,384,384,384,390,204,120,0,0,0,0],"D":[504,396,390,390,390,390,390,390,390,390,390,396,504,0,0,0,0],"E":[510,384,384,384,384,384,504,384,384,384,384,384,510,0,0,0,0],"F":[510,384,384,384,384,384,504,384,384,384,384,384,384,0,0,0,0],"G":[120,204,390,384,384,384,414,390,390,390,390,206,122,0,0,0,0],"H":[390,390,390,390,390,390,510,390,390,390,390,390,390,0,0,0,0],"I":[510,48,48,48,48,48,48,48,48,48,48,48,510,0,0,0,0],"J":[63,12,12,12,12,12,12,12,12,396,396,216,112,0,0,0,0],"K":[390,390,396,396,408,408,496,408,408,396,396,390,390,0,0,0,0],"L":[384,384,384,384,384,384,384,384,384,384,384,384,510,0,0,0,0],"M":[390,390,462,462,510,438,438,438,438,390,390,390,390,0,0,0,0],"N":[390,454,454,486,486,438,438,414,414,398,398,390,390,0,0,0,0],"O":[120,204,390,390,390,390,390,390,390,390,390,204,120,0,0,0,0],"P":[504,396,390,390,390,390,396,504,384,384,384,384,384,0,0,0,0],"Q":[120,204,390,390,390,390,390,390,390,438,414,204,124,6,0,0,0],"R":[504,396,390,390,390,390,396,504,408,396,396,390,390,0,0,0,0],"S":[120,204,390,384,384,192,120,12,6,6,390,204,120,0,0,0,0],"T":[510,48,48,48,48,48,48,48,48,48,48,48,48,0,0,0,0],"U":[390,390,390,390,390,390,390,390,390,390,390,204,120,0,0,0,0],"V":[390,390,390,390,204,204,204,120,120,120,48,48,48,0,0,0,0],"W":[390,390,390,390,390,438,438,438,438,462,462,390,390,0,0,0,0],"X":[390,390,204,204,120,120,48,120,120,204,204,390,390,0,0,0,0],"Y":[390,390,204,204,120,120,48,48,48,48,48,48,48,0,0,0,0],"Z":[510,6,6,12,24,24,48,96,96,192,384,384,510,0,0,0,0],"[":[252,192,192,192,192,192,192,192,192,192,192,192,252,0,0,0,0],"\\":[0,192,192,96,96,48,48,24,24,12,12,6,6,0,0,0,0],"]":[252,12,12,12,12,12,12,12,12,12,12,12,252,0,0,0,0],"^":[48,120,204,390,0,0,0,0,0,0,0,0,0,0,0,0,0],"_":[0,0,0,0,0,0,0,0,0,0,0,0,0,511,0,0,0],"`":[96,48,24,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"a":[0,0,0,0,0,124,198,6,254,390,390,390,250,0,0,0,0],"b":[384,384,384,384,384,440,460,390,390,390,390,460,440,0,0,0,0],"c":[0,0,0,0,0,124,198,384,384,384,384,198,124,0,0,0,0],"d":[6,6,6,6,6,118,206,390,390,390,390,206,118,0,0,0,0],"e":[0,0,0,0,0,120,204,390,510,384,384,198,124,0,0,0,0],"f":[60,102,102,96,96,504,96,96,96,96,96,96,96,0,0,0,0],"g":[0,0,0,0,0,250,398,396,396,396,248,384,252,390,390,390,252],"h":[384,384,384,384,384,440,460,390,390,390,390,390,390,0,0,0,0],"i":[0,0,48,48,0,240,48,48,48,48,48,48,510,0,0,0,0],"j":[0,0,6,6,0,30,6,6,6,6,6,6,6,198,198,198,124],"k":[384,384,384,384,384,396,408,432,480,496,408,396,390,0,0,0,0],"l":[240,48,48,48,48,48,48,48,48,48,48,48,510,0,0,0,0],"m":[0,0,0,0,0,364,510,438,438,438,438,438,438,0,0,0,0],"n":[0,0,0,0,0,440,460,390,390,390,390,390,390,0,0,0,0],"o":[0,0,0,0,0,120,204,390,390,390,390,204,120,0,0,0,0],"p":[0,0,0,0,0,440,460,390,390,390,390,460,440,384,384,384,384],"q":[0,0,0,0,0,118,206,390,390,390,390,206,118,6,6,6,6],"r":[0,0,0,0,0,444,230,192,192,192,192,192,192,0,0,0,0],"s":[0,0,0,0,0,252,390,384,252,6,6,390,252,0,0,0,0],"t":[0,0,96,96,96,504,96,96,96,96,96,102,60,0,0,0,0],"u":[0,0,0,0,0,390,390,390,390,390,390,206,118,0,0,0,0],"v":[0,0,0,0,0,390,390,204,204,120,120,48,48,0,0,0,0],"w":[0,0,0,0,0,390,390,390,438,438,438,510,204,0,0,0,0],"x":[0,0,0,0,0,390,204,120,48,48,120,204,390,0,0,0,0],"y":[0,0,0,0,0,390,390,390,390,390,390,206,118,6,390,204,120],"z":[0,0,0,0,0,254,6,12,24,48,96,192,254,0,0,0,0],"{":[30,48,48,48,48,48,480,48,48,48,48,48,30,0,0,0,0],"|":[48,48,48,48,48,48,48,48,48,48,48,48,48,0,0,0,0],"}":[480,48,48,48,48,48,30,48,48,48,48,48,480,0,0,0,0],"~":[230,438,412,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}}};
+
+// ---------------------------------------------------------------- the 20 screens
+const SCREENS = [
+  {name: 'Spy agent (current)', tag: 'idle', desc: 'Your mascot, "SIA", your code name and points. The lens glints now and then.', draw: sAgent},
+  {name: 'Watching eye', tag: 'idle', desc: 'One big spy eye looks left and right, blinks, and says WATCHING.', draw: sEye},
+  {name: 'Listening bars', tag: 'reacts to sound', desc: 'Bouncing sound bars from the listening bug, with the loudness number.', draw: sBars},
+  {name: 'Mini radar', tag: 'idle', desc: 'A sweeping radar with blips, plus how many intruders were caught.', draw: sRadar},
+  {name: 'Mission ticker', tag: 'mission', desc: 'The current mission scrolls across like a news ticker.', draw: sTicker},
+  {name: 'Big points', tag: 'idle', desc: 'Your points in giant numbers with your rank. +10s fly in when you score.', draw: sPoints},
+  {name: 'Spy clock', tag: 'idle', desc: 'The time in big digits, with a seconds bar ticking along the bottom.', draw: sClock},
+  {name: 'Mission countdown', tag: 'mission', desc: '"NEXT MISSION IN 4:59", counting down with a blinking light.', draw: sCountdown},
+  {name: 'Siren alert', tag: 'alert', desc: 'Spinning siren beams and a flashing ALERT when the sound trap catches someone.', draw: sSiren},
+  {name: 'Code of the day', tag: 'puzzle', desc: 'A scrambled word with its shift; the answer reveals one letter at a time.', draw: sCode},
+  {name: 'Morse beacon', tag: 'gadget', desc: 'The letter being flashed, its dots and dashes, and a lamp that blinks along.', draw: sMorse},
+  {name: 'Mini ID badge', tag: 'idle', desc: 'A tiny agent ID card: small mascot, code name, rank and a barcode.', draw: sBadge},
+  {name: 'Heartbeat', tag: 'reacts to sound', desc: 'A heart monitor line. Noise makes the heart race!', draw: sHeart},
+  {name: 'Mascot dash', tag: 'idle', desc: 'Your mascot runs across the screen leaving a sparkle trail.', draw: sDash},
+  {name: 'Cartoon eyes', tag: 'reacts to sound', desc: 'Two eyes look around. A loud noise makes them go wide with a "!".', draw: sEyes},
+  {name: 'Laser sneak', tag: 'idle', desc: 'Moving security lasers, with your mascot sneaking underneath.', draw: sLasers},
+  {name: 'Code rain', tag: 'idle', desc: 'Falling secret-code letters behind a flashing SIA badge.', draw: sRain},
+  {name: 'Target lock', tag: 'idle', desc: 'Night-vision brackets close in on your mascot: TARGET LOCKED. Matches the new HQ look.', draw: sLock},
+  {name: 'Status HUD', tag: 'system', desc: 'Wi-Fi bars, camera, mic and memory card checks, time and points.', draw: sHud},
+  {name: 'Agent duel', tag: 'idle', desc: 'megaspy vs spyhunter points bars, with a crown on the leader.', draw: sDuel},
+];
+
+// ---------------------------------------------------------------- shared state
+let agent = 'megaspy', loud = 0.05;
+const POINTS = {megaspy: 120, spyhunter: 85};
+const ART = {megaspy: () => UNICORN_SPY, spyhunter: () => AGENT_SPY};
+const bitCache = {};
+const bits = id => bitCache[id] || (bitCache[id] = ART[id]().map(f => f.map(h => parseInt(h, 16).toString(2).padStart(36, '0'))));
+function mascot(g, x, y, t, half, id = agent) {
+  const phase = Math.floor(t / 150) % 20, rows = bits(id)[phase < 4 ? phase : 0];
+  for (let yy = 0; yy < 40; yy += half ? 2 : 1) for (let xx = 0; xx < 36; xx += half ? 2 : 1) {
+    const on = half ? (rows[yy][xx] + rows[yy][xx + 1] + (rows[yy + 1] || '')[xx] + (rows[yy + 1] || '')[xx + 1]).includes('1') : rows[yy][xx] === '1';
+    if (on) g.fillRect(x + (half ? xx / 2 : xx), y + (half ? yy / 2 : yy), 1, 1);
+  }
+}
+// size: 6 = 4x6, 8 = 5x8, 10 = 6x10, 16 = 7x13B, 24 = 10x20
+function fontFor(size) { return size >= 24 ? FONTS.f10x20 : size >= 16 ? FONTS['f7x13B'] : size >= 10 ? FONTS.f6x10 : size <= 6 ? FONTS.f4x6 : FONTS.f5x8; }
+function text(g, s, x, y, size = 8, align = 'left') {
+  const f = fontFor(size); s = String(s);
+  const w = s.length * f.w, x0 = Math.round(align === 'center' ? x - w / 2 : align === 'right' ? x - w : x);
+  [...s].forEach((c, i) => (f.g[c] || f.g['?']).forEach((row, r) => {
+    for (let b = 0; b < f.w; b++) if ((row >> (f.w - 1 - b)) & 1) g.fillRect(x0 + i * f.w + b, Math.round(y) + r, 1, 1);
+  }));
+}
+function inverted(g, x, y, w, h, s, size = 8) {
+  g.fillRect(x, y, w, h); g.fillStyle = '#000'; text(g, s, x + w / 2, y + 1, size, 'center'); g.fillStyle = '#fff';
+}
+function line(g, x1, y1, x2, y2) { g.beginPath(); g.moveTo(x1 + .5, y1 + .5); g.lineTo(x2 + .5, y2 + .5); g.stroke(); }
+function circle(g, x, y, r, fill) { g.beginPath(); g.arc(x, y, r, 0, 7); fill ? g.fill() : g.stroke(); }
+const two = n => String(n).padStart(2, '0');
+const name = () => agent === 'megaspy' ? 'MEGASPY' : 'SPYHUNTR';
+const rnd = s => { const x = Math.sin(s * 999) * 10000; return x - Math.floor(x); };
+
+// ---------------------------------------------------------------- screens
+function sAgent(g, t) {
+  mascot(g, 0, 0, t);
+  text(g, 'SIA', 54, 3, 16, 'center', true);
+  text(g, agent === 'megaspy' ? 'MEGASPY' : 'SPYHUNT', 54, 21, 8, 'center');
+  text(g, POINTS[agent] + ' PTS', 54, 30, 8, 'center');
+}
+function sEye(g, t) {
+  const blink = t % 4000 < 180, look = Math.sin(t / 900) * 12;
+  g.lineWidth = 1.5;
+  g.beginPath(); g.moveTo(8, 16); g.quadraticCurveTo(36, blink ? 16 : -6, 64, 16); g.quadraticCurveTo(36, blink ? 16 : 38, 8, 16); g.stroke();
+  if (!blink) { circle(g, 36 + look, 16, 7, true); g.fillStyle = '#000'; circle(g, 36 + look, 16, 3, true); g.fillRect(38 + look, 12, 2, 2); g.fillStyle = '#fff'; }
+  text(g, 'WATCHING', 36, 31, 8, 'center');
+}
+function sBars(g, t) {
+  text(g, 'LISTEN', 1, 0, 8);
+  text(g, String(Math.round(20 + loud * 2400)), 71, 0, 8, 'right');
+  for (let i = 0; i < 12; i++) {
+    const h = Math.max(2, Math.round((0.3 + 0.7 * loud) * (0.4 + 0.6 * Math.abs(Math.sin(t / 130 + i * 1.7 + rnd(i + Math.floor(t / 90)) * 2))) * 28));
+    g.fillRect(2 + i * 6, 39 - h, 4, h);
+  }
+}
+function sRadar(g, t) {
+  g.lineWidth = 1;
+  circle(g, 19, 20, 18); circle(g, 19, 20, 10);
+  line(g, 1, 20, 37, 20); line(g, 19, 2, 19, 38);
+  const a = t / 500;
+  for (let k = 0; k < 6; k++) { g.globalAlpha = 1 - k / 6; line(g, 19, 20, 19 + Math.cos(a - k * .08) * 18, 20 + Math.sin(a - k * .08) * 18); }
+  g.globalAlpha = 1;
+  [[28, 10, 1], [10, 28, 3], [30, 29, 5]].forEach(([x, y, p]) => { if ((a - p) % 6.28 < 2.5) g.fillRect(x - 1, y - 1, 3, 3); });
+  text(g, 'SCAN', 56, 4, 8, 'center');
+  text(g, '0', 56, 15, 16, 'center', true);
+  text(g, 'CAUGHT', 56, 31, 8, 'center');
+}
+function sTicker(g, t) {
+  inverted(g, 0, 0, 72, 10, 'MISSION');
+  const msg = 'GHOST WALK  +30 PTS  STAY SILENT FOR 20 SECONDS   ';
+  const w = msg.length * fontFor(16).w, x = 72 - (t / 30) % (w + 72);
+  text(g, msg, x, 14, 16, 'left', true);
+  for (let i = 0; i < 6; i++) (Math.floor(t / 300) % 6 === i ? g.fillRect(18 + i * 7, 35, 4, 4) : g.strokeRect(18.5 + i * 7, 35.5, 3, 3));
+}
+function sPoints(g, t) {
+  const cycle = t % 6000, pts = POINTS[agent] + (cycle > 1200 ? 10 : 0);
+  text(g, String(pts), 36, 2, 24, 'center', true);
+  text(g, (agent === 'megaspy' ? '* ' : '') + 'RECRUIT', 36, 30, 8, 'center');
+  if (cycle < 1200) text(g, '+10', 60, 14 - cycle / 120, 8, 'center');
+}
+function sClock(g, t) {
+  const d = new Date();
+  text(g, 'SIA TIME', 36, 0, 8, 'center');
+  text(g, `${two(d.getHours())}${d.getSeconds() % 2 ? ':' : ' '}${two(d.getMinutes())}`, 36, 10, 16, 'center', true);
+  g.strokeRect(2.5, 32.5, 67, 5); g.fillRect(4, 34, Math.round(d.getSeconds() / 59 * 64), 2);
+}
+function sCountdown(g, t) {
+  const left = 299 - Math.floor(t / 1000) % 300;
+  text(g, 'NEXT MISSION', 36, 1, 8, 'center');
+  text(g, `${Math.floor(left / 60)}:${two(left % 60)}`, 36, 12, 16, 'center', true);
+  if (Math.floor(t / 500) % 2) circle(g, 36, 34, 3, true); else circle(g, 36, 34, 3);
+}
+function sSiren(g, t) {
+  const flash = Math.floor(t / 250) % 2, a = t / 150;
+  if (flash) { g.fillRect(0, 0, 72, 40); g.fillStyle = '#000'; }
+  text(g, 'ALERT!', 36, 13, 16, 'center', true);
+  for (const [cx, dir] of [[8, 1], [64, -1]]) {
+    circle(g, cx, 8, 4, true);
+    g.beginPath(); g.moveTo(cx, 8); g.lineTo(cx + Math.cos(a * dir) * 14 - 3, 8 + Math.sin(a * dir) * 14); g.lineTo(cx + Math.cos(a * dir) * 14 + 3, 8 + Math.sin(a * dir) * 14 + 3); g.fill();
+  }
+  text(g, 'INTRUDER', 36, 31, 8, 'center');
+  g.fillStyle = '#fff';
+}
+function sCode(g, t) {
+  const plain = 'HELLO', shift = 3, cipher = [...plain].map(c => String.fromCharCode((c.charCodeAt(0) - 65 + shift) % 26 + 65)).join('');
+  const reveal = Math.floor((t % 9000) / 1200);
+  text(g, 'CODE  SHIFT 3', 36, 0, 8, 'center');
+  text(g, cipher, 36, 9, 16, 'center', true);
+  text(g, [...plain].map((c, i) => i < reveal - 1 ? c : '_').join(' '), 36, 29, 8, 'center');
+}
+function sMorse(g, t) {
+  const seq = [['S', '...'], ['O', '---'], ['S', '...']], unit = 180;
+  const steps = [];
+  seq.forEach(([ch, code], li) => { [...code].forEach(s => { steps.push([li, s === '-' ? 3 : 1, true]); steps.push([li, 1, false]); }); steps[steps.length - 1][1] = 3; });
+  steps[steps.length - 1][1] = 8;
+  const total = steps.reduce((a, s) => a + s[1], 0) * unit;
+  let x = t % total, i = 0; while (x >= steps[i][1] * unit) { x -= steps[i][1] * unit; i++; }
+  const [li, , on] = steps[i];
+  text(g, 'MORSE', 1, 0, 8);
+  text(g, seq[li][0], 14, 10, 24, 'center', true);
+  [...seq[li][1]].forEach((s, k) => s === '-' ? g.fillRect(4 + k * 8, 35, 6, 3) : g.fillRect(6 + k * 8, 35, 3, 3));
+  circle(g, 52, 20, 12); if (on) { circle(g, 52, 20, 9, true); for (let r = 0; r < 8; r++) { const a = r * .785; line(g, 52 + Math.cos(a) * 14, 20 + Math.sin(a) * 14, 52 + Math.cos(a) * 17, 20 + Math.sin(a) * 17); } }
+}
+function sBadge(g, t) {
+  g.strokeRect(0.5, 0.5, 71, 39);
+  inverted(g, 1, 1, 70, 9, 'SIA AGENT ID');
+  mascot(g, 3, 13, t, true);
+  text(g, agent === 'megaspy' ? 'MEGASPY' : 'SPYHUNT', 24, 12, 8);
+  text(g, 'RECRUIT', 24, 20, 8);
+  for (let i = 0; i < 22; i++) if (rnd(i + 3) > .35) g.fillRect(24 + i * 2, 30, 1, 7);
+}
+// ECG height at phase 0..1 of a beat
+function ecgAt(ph) { return ph > .1 && ph < .14 ? 18 : ph < .17 && ph >= .14 ? 6 : ph < .2 && ph >= .17 ? 34 : ph < .24 && ph >= .2 ? 22 : 24; }
+function sHeart(g, t) {
+  const bpm = Math.round(70 + loud * 90), period = 60000 / bpm, ph = (t % period) / period;
+  g.lineWidth = 1; g.beginPath();
+  for (let x = 0; x < 72; x++) {  // the line scrolls left: pixel x shows the beat from (71 - x) steps ago
+    const y = ecgAt((((t - (71 - x) * 25) % period) + period) % period / period);
+    x ? g.lineTo(x + .5, y + .5) : g.moveTo(.5, y + .5);
+  }
+  g.stroke();
+  const beat = ph < .25;
+  const hx = 6, hy = 4, r = beat ? 3 : 2;
+  circle(g, hx - r / 2 + 1, hy, r, true); circle(g, hx + r / 2 + 2, hy, r, true);
+  g.beginPath(); g.moveTo(hx - r - 1, hy + 1); g.lineTo(hx + r + 4, hy + 1); g.lineTo(hx + 1.5, hy + r + 4); g.fill();
+  text(g, bpm + ' BPM', 71, 0, 8, 'right');
+}
+function sDash(g, t) {
+  const x = ((t / 40) % 110) - 38, bob = Math.round(Math.abs(Math.sin(t / 120)) * 3);
+  for (let i = 1; i < 10; i++) { const sx = Math.round(x - i * 5 + 8), sy = 22 + Math.round(Math.sin((t / 120) + i) * 4); if ((i + Math.floor(t / 100)) % 2) { g.fillRect(sx, sy, 1, 1); g.fillRect(sx - 1, sy, 3, 1); g.fillRect(sx, sy - 1, 1, 3); } }
+  mascot(g, Math.round(x) + 18, 10 - bob + 6, t, true);
+  line(g, 0, 39, 72, 39);
+}
+function sEyes(g, t) {
+  const wide = loud > .45, lx = Math.sin(t / 700) * 4, ly = Math.cos(t / 1100) * 3;
+  for (const cx of [20, 52]) {
+    circle(g, cx, 20, wide ? 15 : 12);
+    circle(g, cx + (wide ? 0 : lx), 20 + (wide ? 0 : ly), wide ? 4 : 6, true);
+  }
+  if (wide) { g.fillRect(34, 2, 4, 12); g.fillRect(34, 17, 4, 4); }
+}
+function sLasers(g, t) {
+  g.lineWidth = 1;
+  for (let k = 0; k < 4; k++) { const off = Math.sin(t / 700 + k * 1.3) * 10; line(g, 0, 4 + k * 9 + off, 72, 14 + k * 5 - off); }
+  g.fillStyle = '#000'; g.fillRect(20, 20, 20, 20); g.fillStyle = '#fff';
+  mascot(g, 21 + Math.round(Math.sin(t / 600) * 18) + 0, 20, t, true);
+}
+let drops = Array.from({length: 12}, (_, i) => ({x: i * 6 + 1, y: rnd(i) * 40, v: .4 + rnd(i + 7) * .8}));
+function sRain(g, t) {
+  drops.forEach((d, i) => {
+    d.y = (d.y + d.v) % 48;
+    for (let k = 0; k < 4; k++) { g.globalAlpha = 1 - k * .3; text(g, String.fromCharCode(65 + Math.floor(rnd(i * 31 + Math.floor((t + k * 400) / 400)) * 26)), d.x, d.y - 8 - k * 7, 6); }
+  });
+  g.globalAlpha = 1;
+  if (Math.floor(t / 700) % 3) { g.fillStyle = '#000'; g.fillRect(19, 12, 34, 16); g.fillStyle = '#fff'; g.strokeRect(19.5, 12.5, 33, 15); text(g, 'SIA', 36, 14, 16, 'center', true); }
+}
+function sLock(g, t) {
+  const k = (t % 3000) / 3000, gap = Math.max(0, Math.round((1 - Math.min(k * 1.6, 1)) * 12));
+  mascot(g, 18, 0, t);
+  const L = 7, x1 = 14 - gap, x2 = 57 + gap, y1 = 1 - Math.min(gap, 1), y2 = 38;
+  [[x1, y1, 1, 1], [x2, y1, -1, 1], [x1, y2, 1, -1], [x2, y2, -1, -1]].forEach(([x, y, dx, dy]) => { line(g, x, y, x + dx * L, y); line(g, x, y, x, y + dy * L); });
+  if (k > .62 && Math.floor(t / 250) % 2) { g.fillStyle = '#000'; g.fillRect(8, 30, 56, 9); g.fillStyle = '#fff'; inverted(g, 8, 30, 56, 9, 'LOCKED'); }
+}
+function sHud(g, t) {
+  for (let i = 0; i < 4; i++) g.fillRect(1 + i * 3, 7 - i * 2, 2, 2 + i * 2);
+  text(g, 'CAM', 15, 1, 8); text(g, 'MIC', 37, 1, 8); text(g, 'SD', 58, 1, 8);  // each with a lit "OK" dot
+  [[32, 4], [54, 4], [69, 4]].forEach(([x, y]) => g.fillRect(x - 1, y - 1, 3, 3));
+  line(g, 0, 11, 72, 11);
+  text(g, Math.floor(t / 600) % 2 ? 'ALL SYSTEMS' : 'ALL SYSTEMS', 36, 14, 8, 'center');
+  text(g, 'GO!', 36, 22, 8, 'center');
+  const d = new Date();
+  line(g, 0, 31, 72, 31);
+  text(g, `${two(d.getHours())}:${two(d.getMinutes())}`, 1, 33, 8); text(g, POINTS[agent] + 'P', 71, 33, 8, 'right');
+}
+function sDuel(g, t) {
+  const m = POINTS.megaspy, s = POINTS.spyhunter, top = Math.max(m, s);
+  text(g, 'DUEL', 36, 0, 8, 'center');
+  [['MEGA', m, 12], ['HUNT', s, 26]].forEach(([n, p, y]) => {
+    text(g, n, 0, y, 8);
+    const w = Math.max(2, Math.round(p / top * 24)); g.fillRect(29, y + 1, w, 6);
+    text(g, String(p), 71, y, 8, 'right');
+    if (p === top) {  // crown on the leader, between the name and the bar
+      const cx = 21, cy = y + 1;
+      g.fillRect(cx, cy + 3, 7, 3); g.fillRect(cx, cy, 1, 3); g.fillRect(cx + 3, cy, 1, 3); g.fillRect(cx + 6, cy, 1, 3);
+    }
+  });
+}
+
+// ---------------------------------------------------------------- rendering: draw at 72x40, threshold to 1-bit, show as OLED pixels
+const buf = document.createElement('canvas'); buf.width = 72; buf.height = 40;
+const bg = buf.getContext('2d', {willReadFrequently: true});
+const tiles = SCREENS.map((s, i) => {
+  const el = document.createElement('section');
+  el.className = 'tile';
+  el.innerHTML = `<header><span class="num">${i + 1}</span><div><h2>${s.name}</h2><p>${s.desc}</p><span class="tag">${s.tag}</span></div></header>
+    <div class="module"><canvas width="432" height="240"></canvas></div>`;
+  document.getElementById('grid').appendChild(el);
+  return {s, cv: el.querySelector('canvas')};
+});
+function render(t) {
+  loud = Math.max(0.05, loud * 0.93 + (Math.random() < 0.02 ? Math.random() * 0.4 : 0));
+  tiles.forEach(({s, cv}) => {
+    bg.setTransform(1, 0, 0, 1, 0, 0); bg.globalAlpha = 1;
+    bg.fillStyle = '#000'; bg.fillRect(0, 0, 72, 40);
+    bg.fillStyle = '#fff'; bg.strokeStyle = '#fff'; bg.lineWidth = 1;
+    s.draw(bg, t);
+    const px = bg.getImageData(0, 0, 72, 40).data, g = cv.getContext('2d'), k = 6;
+    g.fillStyle = '#010203'; g.fillRect(0, 0, cv.width, cv.height);
+    g.fillStyle = '#E4F4FF'; g.shadowColor = 'rgba(160,210,255,.8)'; g.shadowBlur = 4;
+    let lit = 0;
+    for (let y = 0; y < 40; y++) for (let x = 0; x < 72; x++) if (px[(y * 72 + x) * 4] > 110) { g.fillRect(x * k, y * k, k - 0.5, k - 0.5); lit++; }
+    cv.dataset.lit = lit;
+    g.shadowBlur = 0;
+  });
+}
+let last = 0;
+function loop(t) { if (t - last > 80) { last = t; render(t); } requestAnimationFrame(loop); }
+document.fonts.ready.then(() => requestAnimationFrame(loop));
+
+document.querySelectorAll('.toggle button').forEach(b => b.onclick = () => {
+  agent = b.dataset.agent; document.body.dataset.agent = agent;
+  document.querySelectorAll('.toggle button').forEach(x => x.classList.toggle('on', x === b));
+});
+document.getElementById('clap').onclick = () => loud = 1;
+</script>
+</body>
+</html>

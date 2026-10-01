@@ -1,4 +1,4 @@
-# SIA mascots for the 72x40 OLED (36x40 each), built on unicorn.py.
+# SIA mascots for the 72x40 OLED (36x40 each), built from outfits.py (which builds on unicorn.py).
 #   python3 spy_art.py          preview as text
 #   python3 spy_art.py h > spy_art.h
 #   python3 spy_art.py page     put the same art into page.h (between ART-BEGIN / ART-END)
@@ -8,54 +8,27 @@ import unicorn
 W, H, K = unicorn.W, unicorn.H, unicorn.K
 P, E = unicorn.P, unicorn.E
 
-def spy_unicorn(glint):
-    """megaspy: the petbot unicorn wearing spy sunglasses."""
-    big = Image.new("L", (W * K, H * K), 0)
-    base = unicorn.draw(False).resize((W * K, H * K), Image.NEAREST)
-    big.paste(base)
-    d = ImageDraw.Draw(big)
-    # sunglasses: a big dark lens over the eye, a bridge and a strap round the head
-    d.rounded_rectangle(E(18.6, 13.8, 25.6, 19), radius=2 * K, fill=0)
-    d.line(P((25.4, 15.6), (28.6, 16.4)), fill=0, width=int(1.0 * K))    # bridge to the far lens
-    d.line(P((18.8, 15.2), (16.2, 14.6)), fill=0, width=int(1.0 * K))    # strap
-    out = big.resize((W, H), Image.BOX).point(lambda v: 255 if v >= 128 else 0)
-    # lens glint: two white pixels that slide across the lens
-    gx = 20 + glint
-    for x, y in ((gx, 15), (gx + 1, 16)):
-        if 19 <= x <= 24:
-            out.putpixel((x, y), 255)
+import outfits
+
+# Picked 2026-09-30 from design/outfit-options.html: megaspy #6 Ninja mask, spyhunter #7 Tuxedo.
+def megaspy_frame(k):
+    """megaspy: the petbot unicorn in a ninja mask; the mask tails flutter."""
+    return outfits.unicorn_outfit("ninja", wave=k)
+
+
+def spyhunter_frame(k):
+    """spyhunter: the spy in a tuxedo and top hat; a glint slides across the shades."""
+    out = outfits.agent_outfit("tuxedo")
+    gx = 13 + k // 2
+    if k:
+        for x in (gx, gx + 6):
+            out.putpixel((x, 16), 255)
     return out
 
-def spy_agent(glint):
-    """spyhunter: a classic spy in a fedora, coat collar up, dark glasses."""
-    im = Image.new("L", (W * K, H * K), 0)
-    d = ImageDraw.Draw(im)
-    # coat with a tall collar
-    d.polygon(P((3, 40), (7, 29), (13, 26), (23, 26), (29, 29), (33, 40)), fill=255)
-    d.polygon(P((11, 26.5), (18, 36), (25, 26.5), (22.5, 26), (18, 31), (13.5, 26)), fill=0)   # lapels/V
-    d.polygon(P((8.5, 29), (12, 21.5), (14, 27)), fill=255)                                   # left collar
-    d.polygon(P((27.5, 29), (24, 21.5), (22, 27)), fill=255)                                  # right collar
-    # face
-    d.ellipse(E(11, 10, 25, 27), fill=255)
-    # fedora: brim + crown with a band
-    d.rounded_rectangle(E(4, 10, 32, 13), radius=1.5 * K, fill=255)
-    d.polygon(P((9, 11), (10.5, 3), (18, 1.5), (25.5, 3), (27, 11)), fill=255)
-    d.line(P((9.4, 8.6), (26.6, 8.6)), fill=0, width=int(1.4 * K))
-    d.line(P((16, 2.2), (18, 4.5), (20, 2.2)), fill=0, width=int(0.9 * K))                   # crown pinch
-    # dark glasses
-    d.rounded_rectangle(E(12.6, 15.2, 17.4, 18.6), radius=1.4 * K, fill=0)
-    d.rounded_rectangle(E(18.6, 15.2, 23.4, 18.6), radius=1.4 * K, fill=0)
-    # mouth: a sly smile
-    d.arc(E(15, 19.5, 21.5, 24), 20, 160, fill=0, width=int(0.9 * K))
-    out = im.resize((W, H), Image.BOX).point(lambda v: 255 if v >= 128 else 0)
-    gx = 13 + glint // 2
-    for x in (gx, gx + 6):
-        out.putpixel((x, 16), 255)
-    return out
 
 FRAMES = {
-    "UNICORN_SPY": [spy_unicorn(g) for g in range(4)],
-    "AGENT_SPY": [spy_agent(g) for g in range(4)],
+    "UNICORN_SPY": [megaspy_frame(k) for k in range(4)],
+    "AGENT_SPY": [spyhunter_frame(k) for k in range(4)],
 }
 
 def preview(im):

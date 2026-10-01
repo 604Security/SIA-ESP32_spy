@@ -9,7 +9,7 @@ const char PAGE_HTML[] PROGMEM = R"rawliteral(<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SIA · Secret Intelligence Agency</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Special+Elite&family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Special+Elite&family=VT323&family=Share+Tech+Mono&family=Orbitron:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{
   color-scheme:dark;
@@ -173,6 +173,59 @@ details.explain summary{cursor:pointer; font-weight:700; font-size:20px}
 @keyframes alarm{50%{border-color:transparent; background:rgba(255,75,92,.08)}}
 .alarm-banner{position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:41; background:var(--red); color:#fff; font-weight:700;
   font-size:24px; padding:10px 22px; border-radius:999px; box-shadow:0 6px 30px rgba(255,75,92,.6)}
+/* ---------- night-vision screen: HQ (design pick #2) and the fingerprint login (pick #1) ---------- */
+body{--nv:#8CFFB0; --nv-glow:rgba(140,255,176,.7); --nv1:#0F4A24; --nv2:#052210; --nv3:#010803}
+body[data-agent="megaspy"]{--nv:#FFB3D6; --nv-glow:rgba(255,120,190,.7); --nv1:#4A0F33; --nv2:#22051A; --nv3:#080106}
+.nv{position:relative; border-radius:20px; overflow:hidden; isolation:isolate; color:var(--nv); font-family:"Share Tech Mono",var(--mono);
+  text-shadow:0 0 6px var(--nv-glow); background:radial-gradient(ellipse at center,var(--nv1) 0%,var(--nv2) 60%,var(--nv3) 100%);
+  padding:56px 26px 26px; margin-top:12px; min-height:520px}
+.nv::before{content:""; position:absolute; inset:0; background:repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0 2px,transparent 2px 4px); z-index:5; pointer-events:none}
+.nv::after{content:""; position:absolute; inset:-50%; z-index:6; pointer-events:none; opacity:.1;
+  background-image:radial-gradient(#fff .7px,transparent .8px); background-size:5px 5px; animation:nvnoise .25s steps(3) infinite}
+@keyframes nvnoise{to{transform:translate(3px,-2px)}}
+.nv > *{position:relative; z-index:2}
+.nv .cn{position:absolute; width:34px; height:34px; border:2px solid currentColor; z-index:3}
+.nv .c1{top:14px; left:14px; border-right:0; border-bottom:0} .nv .c2{top:14px; right:14px; border-left:0; border-bottom:0}
+.nv .c3{bottom:14px; left:14px; border-right:0; border-top:0} .nv .c4{bottom:14px; right:14px; border-left:0; border-top:0}
+.nv .rec{position:absolute; top:22px; left:58px; font-size:17px} .nv .rec b{color:#FF4B5C; text-shadow:0 0 8px #FF4B5C; animation:blink 1s steps(1) infinite}
+.nv .clock{position:absolute; top:22px; right:58px; font-size:17px}
+.scope{position:relative; width:220px; height:220px; margin:10px auto 6px; display:grid; place-items:center}
+.scope::before{content:""; position:absolute; inset:0; border:2px solid currentColor; border-radius:50%; opacity:.8}
+.scope i{position:absolute; background:currentColor; opacity:.8}
+.scope .h{left:-24px; right:-24px; top:50%; height:2px} .scope .v{top:-24px; bottom:-24px; left:50%; width:2px}
+.scope canvas{width:118px; height:131px; image-rendering:pixelated; filter:drop-shadow(0 0 8px var(--nv-glow)); position:relative; z-index:1}
+.readout{font-size:21px; line-height:1.55; margin:10px 0 4px}
+.readout b{font-weight:400; letter-spacing:1px}
+.nvbar{height:16px; border:2px solid currentColor; padding:2px; margin:6px 0 4px}
+.nvbar i{display:block; height:100%; width:0; background:currentColor; box-shadow:0 0 10px var(--nv-glow); transition:width .5s}
+.nvnext{font-size:17px; opacity:.85}
+.nvbadges{display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 6px; font-size:16px}
+.nvbadges span{border:1.5px solid currentColor; padding:3px 8px}
+.nvbadges span.locked{opacity:.3}
+.nvmenu{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:18px}
+.nvmenu a{border:2px solid currentColor; padding:14px 8px; text-align:center; font-size:20px; letter-spacing:2px; text-decoration:none; transition:background .15s, color .15s}
+.nvmenu a small{display:block; font-size:14px; letter-spacing:0; opacity:.8}
+.nvmenu a:hover,.nvmenu a:focus-visible{background:var(--nv); color:var(--nv3); text-shadow:none; outline:none}
+/* login */
+.nv.login{text-align:center}
+.nvstep{font-size:18px; letter-spacing:2px; margin:6px 0 10px}
+.pick{display:flex; justify-content:center; gap:16px; flex-wrap:wrap}
+.pick button{all:unset; cursor:pointer; border:2px solid currentColor; padding:10px 14px 8px; opacity:.45; min-width:120px; transition:opacity .15s, box-shadow .15s}
+.pick button canvas{display:block; width:72px; height:80px; margin:0 auto 4px; image-rendering:pixelated}
+.pick button b{display:block; font-weight:400; font-size:19px}
+.pick button small{font-size:14px}
+.pick button.sel{opacity:1; box-shadow:0 0 18px var(--nv-glow)}
+.pick button:focus-visible{outline:2px dashed currentColor; outline-offset:4px}
+.fp{all:unset; cursor:pointer; position:relative; width:170px; height:170px; margin:8px auto 4px; border-radius:50%; display:grid; place-items:center;
+  background:conic-gradient(var(--nv) calc(var(--p,0)*1%),rgba(255,255,255,.08) 0); touch-action:none; -webkit-user-select:none; user-select:none}
+.fp > div{width:150px; height:150px; border-radius:50%; background:var(--nv2); display:grid; place-items:center; position:relative; overflow:hidden}
+.fp svg{width:96px; height:96px; color:var(--nv)}
+.fp .beam{position:absolute; left:0; right:0; height:3px; background:var(--nv); box-shadow:0 0 10px var(--nv); animation:fpbeam 1.4s ease-in-out infinite alternate}
+.fp.idle .beam{animation-play-state:paused; opacity:.3}
+.fp:focus-visible{outline:2px dashed var(--nv); outline-offset:6px}
+@keyframes fpbeam{from{top:12%}to{top:86%}}
+.fpmsg{font-size:19px; letter-spacing:2px; margin:12px 0 0; min-height:52px}
+.fpmsg.ok{font-family:"Orbitron","Share Tech Mono",monospace; border:2px solid currentColor; padding:8px; display:inline-block}
 @media (max-width:560px){ .file{grid-template-columns:1fr} .lb{grid-template-columns:100px 1fr 56px} .trapstate{font-size:36px} }
 </style>
 </head>
@@ -195,9 +248,18 @@ details.explain summary{cursor:pointer; font-weight:700; font-size:20px}
 <main>
 <!-- ===================== LOGIN ===================== -->
 <section id="login">
-  <h2>Who is reporting for duty?</h2>
-  <p class="hint">Tap your agent card to log in to SIA headquarters.</p>
-  <div class="agents" id="agent-cards"></div>
+  <div class="nv login">
+    <span class="cn c1"></span><span class="cn c2"></span><span class="cn c3"></span><span class="cn c4"></span>
+    <div class="rec"><b>●</b> SIA BIOMETRIC GATE</div>
+    <div class="nvstep">1 · TAP YOUR AGENT</div>
+    <div class="pick" id="agent-cards"></div>
+    <div class="nvstep" style="margin-top:22px">2 · HOLD YOUR THUMB ON THE SCANNER</div>
+    <button class="fp idle" id="fp" aria-label="Fingerprint scanner: press and hold">
+      <div><span class="beam"></span>
+        <svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 44c-3-4-4-9-4-14 0-9 7-16 16-16s16 7 16 16"/><path d="M24 50c-3-5-4-10-4-20 0-6 4-10 10-10s10 4 10 10c0 4 0 8-1 12"/><path d="M30 30c0 8 1 14 4 20"/><path d="M36 52c2-4 3-9 3-14"/><path d="M12 22c3-7 10-12 18-12 7 0 13 3 16 8"/><path d="M47 34c1 5 0 10-2 14"/></svg>
+      </div></button>
+    <div class="fpmsg" id="fp-msg" aria-live="polite">SELECT YOUR AGENT, THEN HOLD</div>
+  </div>
   <details class="explain" open>
     <summary>🕵️ What is SIA?</summary>
     <p>SIA stands for <b>Secret Intelligence Agency</b>. Agents go on <b>missions</b> using <b>spy gadgets</b>
@@ -208,26 +270,21 @@ details.explain summary{cursor:pointer; font-weight:700; font-size:20px}
 
 <!-- ===================== HQ ===================== -->
 <section id="hq" hidden>
-  <div class="dossier">
-    <span class="stamp">TOP SECRET</span>
-    <div class="file">
-      <canvas id="hq-art" width="144" height="160"></canvas>
-      <div>
-        <h3>AGENT FILE: <span id="hq-name"></span></h3>
-        <div id="hq-rank" style="font-size:22px"></div>
-        <div class="pts"><span id="hq-points">0</span> <small style="font-size:20px">points</small></div>
-        <div class="progress"><i id="hq-progress"></i></div>
-        <div id="hq-next" style="font-size:16px"></div>
-      </div>
-    </div>
-    <div class="badges" id="hq-badges"></div>
+  <div class="nv">
+    <span class="cn c1"></span><span class="cn c2"></span><span class="cn c3"></span><span class="cn c4"></span>
+    <div class="rec"><b>●</b> REC · NV MODE</div><div class="clock" id="hq-clock"></div>
+    <div class="scope"><i class="h"></i><i class="v"></i><canvas id="hq-art" width="144" height="160"></canvas></div>
+    <div class="readout">TARGET LOCKED: <b id="hq-name"></b><br>RANK ....... <b id="hq-rank"></b><br>POINTS ..... <b id="hq-points">0</b></div>
+    <div class="nvbar"><i id="hq-progress"></i></div>
+    <div class="nvnext" id="hq-next"></div>
+    <div class="nvbadges" id="hq-badges"></div>
+    <nav class="nvmenu">
+      <a href="#missions">[ MISSIONS ]<small>earn points, rank up</small></a>
+      <a href="#gadgets">[ GADGETS ]<small>your spy tools</small></a>
+      <a href="#trap">[ SOUND TRAP ]<small>catch intruders</small></a>
+      <a href="#files">[ CASE FILES ]<small>evidence &amp; log</small></a>
+    </nav>
   </div>
-  <nav class="nav">
-    <a href="#missions"><span class="ico">🗂️</span><b>Missions</b><small>Earn points, rank up</small></a>
-    <a href="#gadgets"><span class="ico">🧰</span><b>Gadgets</b><small>Your spy tools</small></a>
-    <a href="#trap"><span class="ico">🚨</span><b>Sound trap</b><small>Catch intruders on camera</small></a>
-    <a href="#files"><span class="ico">📁</span><b>Case files</b><small>Evidence photos &amp; log</small></a>
-  </nav>
   <div class="board">
     <h3>🏆 Top agents</h3>
     <div id="leaderboard"></div>
@@ -353,14 +410,14 @@ details.explain summary{cursor:pointer; font-weight:700; font-size:20px}
 
 <script>
 // ART-BEGIN
-const UNICORN_SPY = [['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc8180','03dfe4260','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'],
-  ['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc4180','03dfe2260','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'],
-  ['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc2180','03dfe1260','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'],
-  ['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc1180','03dfe0a60','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800']];
-const AGENT_SPY = [['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','001c71800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8'],
-  ['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','001c71800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8'],
-  ['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','001a69800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8'],
-  ['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','001a69800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']];
+const UNICORN_SPY = [['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','010700000','000000000','03800e000','03d80e000','07e006008','07010000c','070c0000e','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'],
+  ['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','010fffe00','010300000','010000000','03c00e000','03d80e000','07f006008','07800000c','07040000e','073cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'],
+  ['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00bfcf800','0107ffe00','000100000','01c000000','03d00e000','03dc0e000','07f006008','07a00000c','07840000e','070cffffe','0e38ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'],
+  ['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','010fffe00','010300000','010000000','03c00e000','03d80e000','07f006008','07800000c','07040000e','073cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800']];
+const AGENT_SPY = [['003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','000000000','000000000','001fff800','03fffffc0','03fffffc0','01fffff80','000fff000','000fff000','001861800','001861800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff000','000f07000','0007fe000','0003fc000','0007fe000','0039f9c00','00fcf1f00','01fc23f80','03fe23fc0','03ff0ffc0','03ff9ffc0','07ffdffe0','07fffffe0','07fffffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8'],
+  ['003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','000000000','000000000','001fff800','03fffffc0','03fffffc0','01fffff80','000fff000','000fff000','001861800','001c71800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff000','000f07000','0007fe000','0003fc000','0007fe000','0039f9c00','00fcf1f00','01fc23f80','03fe23fc0','03ff0ffc0','03ff9ffc0','07ffdffe0','07fffffe0','07fffffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8'],
+  ['003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','000000000','000000000','001fff800','03fffffc0','03fffffc0','01fffff80','000fff000','000fff000','001861800','001a69800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff000','000f07000','0007fe000','0003fc000','0007fe000','0039f9c00','00fcf1f00','01fc23f80','03fe23fc0','03ff0ffc0','03ff9ffc0','07ffdffe0','07fffffe0','07fffffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8'],
+  ['003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','003fffc00','000000000','000000000','001fff800','03fffffc0','03fffffc0','01fffff80','000fff000','000fff000','001861800','001a69800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff000','000f07000','0007fe000','0003fc000','0007fe000','0039f9c00','00fcf1f00','01fc23f80','03fe23fc0','03ff0ffc0','03ff9ffc0','07ffdffe0','07fffffe0','07fffffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']];
 // ART-END
 
 const $ = id => document.getElementById(id);
@@ -411,7 +468,8 @@ const FRAMES = {};
 function frames(id) { return FRAMES[id] || (FRAMES[id] = AGENTS[id].art().map(toBits)); }
 function drawMascot(cv, id, t) {
   const g = cv.getContext('2d'), px = cv.width / 36, a = AGENTS[id];
-  const phase = Math.floor(t / 150) % 20, rows = frames(id)[phase < 4 ? phase : 0];
+  const phase = Math.floor(t / 150) % 20;
+  const rows = frames(id)[id === 'megaspy' ? Math.floor(t / 200) % 4 : phase < 4 ? phase : 0];
   g.clearRect(0, 0, cv.width, cv.height);
   g.fillStyle = a.color;
   rows.forEach((row, y) => { for (let x = 0; x < 36; x++) if (row[x] === '1') {
@@ -504,38 +562,77 @@ function siren() {
 const loud01 = l => Math.min(1, Math.max(0, (Math.log10(Math.max(l, 10)) - 1) / 2.6));
 const camUrl = () => 'http://' + location.hostname + ':81/stream';
 
-// ---------- LOGIN ----------
+// ---------- LOGIN: pick your agent, then hold your thumb on the fingerprint scanner ----------
+const HOLD_MS = 1500;
 function startLogin() {
-  refresh().then(() => {
-    $('agent-cards').innerHTML = state.agents.map(a => {
+  let chosen = agent || 'megaspy', holding = false, t0 = 0, raf = 0, done = false;
+  const fp = $('fp'), msg = $('fp-msg');
+  const choose = id => {
+    chosen = id;
+    document.body.dataset.agent = id;  // preview that agent's colours
+    document.querySelectorAll('.pick button').forEach(b => b.classList.toggle('sel', b.dataset.id === id));
+    msg.className = 'fpmsg'; msg.textContent = `AGENT ${id.toUpperCase()} · HOLD YOUR THUMB ON THE SCANNER`;
+  };
+  refresh().catch(() => {}).then(() => {
+    const list = state ? state.agents : Object.keys(AGENTS).map(id => ({id, points: 0}));
+    $('agent-cards').innerHTML = list.map(a => {
       const r = rankOf(a.points, a.id);
-      return `<a class="agent-card ${a.id}" href="#hq" data-id="${a.id}">
-        <canvas width="144" height="160" data-mascot="${a.id}"></canvas>
-        <b>${a.id}</b><div class="rank">${r.icon} ${r.name} · ${a.points} points</div>
-        <div class="rank" style="font-size:15px">${AGENTS[a.id].icon} ${AGENTS[a.id].theme}</div></a>`;
+      return `<button data-id="${a.id}"><canvas width="72" height="80" data-mascot="${a.id}"></canvas><b>${a.id}</b><small>${r.icon} ${r.name} · ${a.points} pts</small></button>`;
     }).join('');
-    document.querySelectorAll('.agent-card').forEach(c => c.onclick = () => setAgent(c.dataset.id));
-  }).catch(() => $('agent-cards').innerHTML = '<p class="hint">Can\'t reach SIA HQ. Is petbot switched on?</p>');
+    document.querySelectorAll('.pick button').forEach(b => b.onclick = () => choose(b.dataset.id));
+    choose(chosen);
+  });
+  const tick = () => {
+    if (!holding) return;
+    const p = Math.min(1, (performance.now() - t0) / HOLD_MS);
+    fp.style.setProperty('--p', p * 100);
+    if (p >= 1) {
+      holding = false; done = true;
+      msg.className = 'fpmsg ok'; msg.textContent = `ACCESS GRANTED · WELCOME, AGENT ${chosen.toUpperCase()}`;
+      setAgent(chosen);
+      setTimeout(() => { location.hash = '#hq'; }, 900);
+      return;
+    }
+    raf = requestAnimationFrame(tick);
+  };
+  const press = e => {
+    if (done || holding) return;
+    if (e) e.preventDefault();
+    holding = true; t0 = performance.now(); fp.classList.remove('idle');
+    msg.className = 'fpmsg'; msg.textContent = 'SCANNING... KEEP HOLDING';
+    raf = requestAnimationFrame(tick);
+  };
+  const release = () => {
+    if (!holding) return;
+    holding = false; cancelAnimationFrame(raf);
+    fp.style.setProperty('--p', 0); fp.classList.add('idle');
+    msg.className = 'fpmsg'; msg.textContent = 'TOO QUICK! HOLD YOUR THUMB STILL';
+  };
+  fp.onpointerdown = press; fp.onpointerup = release; fp.onpointerleave = release; fp.onpointercancel = release;
+  fp.oncontextmenu = e => e.preventDefault();
+  fp.onkeydown = e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) press(e); };
+  fp.onkeyup = e => { if (e.key === ' ' || e.key === 'Enter') release(); };
+  onLeave(() => { holding = false; cancelAnimationFrame(raf); fp.style.setProperty('--p', 0); fp.classList.add('idle'); if (agent) document.body.dataset.agent = agent; });
 }
 
-// ---------- HQ ----------
+// ---------- HQ: the night-vision screen ----------
 function startHq() {
   $('hq-art').dataset.mascot = agent;
+  every(1000, () => { const d = new Date(); $('hq-clock').textContent = [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2, '0')).join(':'); });
   every(3000, () => refresh().then(() => {
     const m = me(), r = rankOf(m.points, m.id);
-    $('hq-name').textContent = m.id;
-    $('hq-rank').textContent = `${r.icon} ${r.name}`;
+    $('hq-name').textContent = m.id.toUpperCase();
+    $('hq-rank').textContent = `${r.name.toUpperCase()} ${r.icon}`;
     $('hq-points').textContent = m.points;
     if (r.next) {
-      const pct = (m.points - r.floor) / (r.next[0] - r.floor) * 100;
-      $('hq-progress').style.width = pct + '%';
-      $('hq-next').textContent = `${r.next[0] - m.points} more points to become ${r.next[2]} ${r.next[1]}`;
+      $('hq-progress').style.width = (m.points - r.floor) / (r.next[0] - r.floor) * 100 + '%';
+      $('hq-next').textContent = `${r.next[0] - m.points} MORE POINTS → ${r.next[1].toUpperCase()} ${r.next[2]}`;
     } else {
       $('hq-progress').style.width = '100%';
-      $('hq-next').textContent = 'Top rank reached. Legendary!';
+      $('hq-next').textContent = 'TOP RANK REACHED. LEGENDARY!';
     }
     $('hq-badges').innerHTML = MISSIONS.map((ms, i) =>
-      `<span class="badge ${m.done[i] ? '' : 'locked'}" title="${ms.name}">${ms.icon} ${ms.name}${m.done[i] ? ' ×' + m.done[i] : ''}</span>`).join('');
+      `<span class="${m.done[i] ? '' : 'locked'}" title="${ms.name}">${ms.icon} ${m.done[i] ? '×' + m.done[i] : '--'}</span>`).join('');
     const top = Math.max(1, ...state.agents.map(a => a.points));
     $('leaderboard').innerHTML = state.agents.slice().sort((a, b) => b.points - a.points).map(a =>
       `<div class="lb"><span>${AGENTS[a.id].icon} ${a.id}</span><span class="bar"><i style="width:${a.points / top * 100}%; background:${AGENTS[a.id].color}"></i></span><span class="v">${a.points}</span></div>`).join('');

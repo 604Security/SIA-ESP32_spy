@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIA login · 10 ways in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Special+Elite&family=Share+Tech+Mono&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07090D; --panel:#10151D; --line:#253245; --ink:#EAF2FB; --muted:#93A7BC;
+  --acc:#FF5FA2; --nv:#FFB3D6; --nv-glow:rgba(255,120,190,.7); --nv-bg1:#4A0F33; --nv-bg2:#22051A; --nv-bg3:#080106; --ok:#8CFFB0}
+body[data-agent="spyhunter"]{--acc:#39FF9E; --nv:#8CFFB0; --nv-glow:rgba(140,255,176,.7); --nv-bg1:#0F4A24; --nv-bg2:#052210; --nv-bg3:#010803}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:"Fredoka",system-ui,sans-serif}
+.top{max-width:1320px; margin:0 auto; padding:24px 16px 6px; display:flex; flex-wrap:wrap; gap:16px; align-items:end; justify-content:space-between}
+.top h1{margin:0; font-family:"Special Elite",monospace; font-weight:400; font-size:34px}
+.top p{margin:4px 0 0; color:var(--muted); font-size:17px; max-width:780px}
+.toggle{display:flex; gap:6px; background:var(--panel); border:2px solid var(--line); border-radius:999px; padding:5px}
+.toggle button{font:inherit; font-weight:700; font-size:16px; border:0; border-radius:999px; padding:8px 16px; cursor:pointer; background:transparent; color:var(--muted)}
+.toggle button.on{background:var(--acc); color:#10040A}
+.grid{max-width:1320px; margin:0 auto; padding:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px}
+.tile{background:var(--panel); border:2px solid var(--line); border-radius:22px; padding:14px; display:flex; flex-direction:column; gap:10px}
+.tile header{display:flex; gap:12px; align-items:flex-start}
+.num{flex:none; width:42px; height:42px; border-radius:50%; background:var(--acc); color:#10040A; display:grid; place-items:center; font-weight:700; font-size:21px}
+.tile h2{margin:0; font-size:20px}
+.tile p{margin:2px 0 0; color:var(--muted); font-size:14px; line-height:1.35}
+footer{max-width:1320px; margin:0 auto; padding:10px 16px 40px; color:var(--muted)}
+
+/* ---------- the night-vision screen every option lives in (HQ look #2) ---------- */
+.nv{position:relative; height:440px; border-radius:14px; overflow:hidden; isolation:isolate; color:var(--nv); font-family:"Share Tech Mono",monospace;
+  text-shadow:0 0 6px var(--nv-glow); background:radial-gradient(ellipse at center,var(--nv-bg1) 0%,var(--nv-bg2) 60%,var(--nv-bg3) 100%); --cycle:6s}
+.nv::before{content:""; position:absolute; inset:0; background:repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0 2px,transparent 2px 4px); z-index:20; pointer-events:none}
+.nv::after{content:""; position:absolute; inset:-50%; z-index:21; pointer-events:none; opacity:.1;
+  background-image:radial-gradient(#fff .7px,transparent .8px); background-size:5px 5px; animation:noise .25s steps(3) infinite}
+@keyframes noise{to{transform:translate(3px,-2px)}}
+.nv .cn{position:absolute; width:26px; height:26px; border:2px solid currentColor}
+.nv .c1{top:10px; left:10px; border-right:0; border-bottom:0} .nv .c2{top:10px; right:10px; border-left:0; border-bottom:0}
+.nv .c3{bottom:10px; left:10px; border-right:0; border-top:0} .nv .c4{bottom:10px; right:10px; border-left:0; border-top:0}
+.nv .head{position:absolute; top:18px; left:0; right:0; text-align:center; font-size:14px; letter-spacing:3px}
+.nv .head b{color:#FF4B5C; text-shadow:0 0 8px #FF4B5C; animation:blink 1s steps(1) infinite}
+.nv .hint{position:absolute; left:16px; right:16px; bottom:78px; text-align:center; font-size:14px; opacity:.85}
+@keyframes blink{50%{opacity:0}}
+/* "ACCESS GRANTED" plays at the end of every loop */
+.granted{position:absolute; left:14px; right:14px; bottom:22px; z-index:10; text-align:center; font-family:"Orbitron"; font-size:15px; letter-spacing:2px;
+  border:2px solid currentColor; padding:8px; opacity:0; animation:granted var(--cycle) steps(1) infinite}
+.granted small{display:block; font-family:"Share Tech Mono"; font-size:13px; letter-spacing:1px}
+@keyframes granted{0%,74%{opacity:0}75%,100%{opacity:1}}
+.pending{position:absolute; left:14px; right:14px; bottom:22px; text-align:center; font-size:14px; letter-spacing:2px; animation:pending var(--cycle) steps(1) infinite}
+@keyframes pending{0%,74%{opacity:1}75%,100%{opacity:0}}
+canvas.mascot{image-rendering:pixelated}
+.agents{position:absolute; top:46px; left:0; right:0; display:flex; justify-content:center; gap:18px; font-size:12px; text-align:center}
+.agents div{border:1.5px solid currentColor; border-radius:8px; padding:4px 8px 2px; opacity:.45}
+.agents div.sel{opacity:1; box-shadow:0 0 12px var(--nv-glow)}
+.agents canvas{display:block; width:36px; height:40px; margin:0 auto 2px}
+
+/* 1 fingerprint */
+.o1 .pad{position:absolute; top:130px; left:50%; width:150px; height:150px; margin-left:-75px; border-radius:50%; display:grid; place-items:center;
+  background:conic-gradient(currentColor var(--p,0%),rgba(255,255,255,.08) 0); animation:fill1 var(--cycle) linear infinite}
+@property --p{syntax:'<percentage>'; inherits:false; initial-value:0%}
+@keyframes fill1{0%,10%{--p:0%}70%,100%{--p:100%}}
+.o1 .pad > div{width:134px; height:134px; border-radius:50%; background:var(--nv-bg2); display:grid; place-items:center; position:relative; overflow:hidden}
+.o1 .pad svg{width:86px; height:86px}
+.o1 .pad .beam{position:absolute; left:0; right:0; height:3px; background:currentColor; box-shadow:0 0 10px currentColor; animation:beam 1.4s ease-in-out infinite alternate}
+@keyframes beam{from{top:12%}to{top:86%}}
+/* 2 retina */
+.o2 .eye{position:absolute; top:130px; left:50%; width:230px; height:120px; margin-left:-115px; border:2px solid currentColor; border-radius:50%/50%; overflow:hidden}
+.o2 .iris{position:absolute; top:50%; left:50%; width:84px; height:84px; margin:-42px 0 0 -42px; border-radius:50%;
+  background:repeating-conic-gradient(currentColor 0 6deg,transparent 6deg 14deg); animation:iris var(--cycle) ease-in-out infinite}
+.o2 .iris::after{content:""; position:absolute; inset:26px; border-radius:50%; background:#000; box-shadow:0 0 0 3px currentColor}
+@keyframes iris{0%,20%{transform:scale(1)}40%,70%{transform:scale(.8)}100%{transform:scale(1)}}
+.o2 .sweep{position:absolute; top:0; bottom:0; width:6px; background:currentColor; box-shadow:0 0 16px currentColor; animation:sweep 1.6s ease-in-out infinite alternate}
+@keyframes sweep{from{left:5%}to{left:93%}}
+.o2 .read{position:absolute; top:270px; left:0; right:0; text-align:center; font-size:15px}
+/* 3 keypad */
+.o3 .dots{position:absolute; top:110px; left:0; right:0; display:flex; justify-content:center; gap:14px}
+.o3 .dots i{width:16px; height:16px; border-radius:50%; border:2px solid currentColor}
+.o3 .dots i:nth-child(1){animation:dot1 var(--cycle) steps(1) infinite} .o3 .dots i:nth-child(2){animation:dot2 var(--cycle) steps(1) infinite}
+.o3 .dots i:nth-child(3){animation:dot3 var(--cycle) steps(1) infinite} .o3 .dots i:nth-child(4){animation:dot4 var(--cycle) steps(1) infinite}
+@keyframes dot1{0%,14%{background:transparent}15%,100%{background:currentColor}} @keyframes dot2{0%,29%{background:transparent}30%,100%{background:currentColor}}
+@keyframes dot3{0%,44%{background:transparent}45%,100%{background:currentColor}} @keyframes dot4{0%,59%{background:transparent}60%,100%{background:currentColor}}
+.o3 .keys{position:absolute; top:146px; left:50%; width:210px; margin-left:-105px; display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+.o3 .keys span{border:1.5px solid currentColor; border-radius:10px; padding:7px 0; text-align:center; font-size:20px}
+.o3 .keys span.k{animation:key var(--cycle) steps(1) infinite}
+@keyframes key{0%,100%{background:transparent}}
+.o3 .keys span.k1{animation-name:k1} .o3 .keys span.k2{animation-name:k2} .o3 .keys span.k3{animation-name:k3} .o3 .keys span.k4{animation-name:k4}
+@keyframes k1{0%,9%,16%,100%{background:transparent; color:inherit}10%,15%{background:currentColor}}
+@keyframes k2{0%,24%,31%,100%{background:transparent}25%,30%{background:currentColor}}
+@keyframes k3{0%,39%,46%,100%{background:transparent}40%,45%{background:currentColor}}
+@keyframes k4{0%,54%,61%,100%{background:transparent}55%,60%{background:currentColor}}
+/* 4 card swipe */
+.o4 .reader{position:absolute; top:150px; left:50%; width:70px; height:150px; margin-left:20px; border:2px solid currentColor; border-radius:10px}
+.o4 .reader::before{content:""; position:absolute; left:28px; top:10px; bottom:10px; width:6px; background:#000; box-shadow:0 0 0 1px currentColor}
+.o4 .reader i{position:absolute; bottom:-22px; left:22px; width:22px; height:10px; border-radius:6px; background:#FF4B5C; box-shadow:0 0 10px #FF4B5C; animation:led var(--cycle) steps(1) infinite}
+@keyframes led{0%,74%{background:#FF4B5C; box-shadow:0 0 10px #FF4B5C}75%,100%{background:var(--ok); box-shadow:0 0 10px var(--ok)}}
+.o4 .card{position:absolute; top:120px; left:50%; width:98px; height:62px; margin-left:-30px; border:2px solid currentColor; border-radius:8px; background:var(--nv-bg2);
+  display:flex; gap:4px; align-items:center; padding:4px; font-size:10px; animation:swipe var(--cycle) ease-in-out infinite; z-index:2}
+.o4 .card canvas{width:32px; height:36px}
+@keyframes swipe{0%,15%{transform:translate(-60px,0) rotate(-8deg)}35%{transform:translate(10px,0) rotate(0)}65%,100%{transform:translate(10px,150px) rotate(0)}}
+/* 5 voice */
+.o5 .say{position:absolute; top:112px; left:0; right:0; text-align:center; font-size:15px}
+.o5 .wave{position:absolute; top:160px; left:30px; right:30px; height:110px; display:flex; align-items:center; gap:4px}
+.o5 .wave i{flex:1; background:currentColor; border-radius:3px; height:8%; animation:wave .5s ease-in-out infinite alternate}
+@keyframes wave{to{height:90%}}
+.o5 .word{position:absolute; top:292px; left:0; right:0; text-align:center; font-family:"Orbitron"; font-size:26px; letter-spacing:6px; animation:word var(--cycle) steps(1) infinite}
+@keyframes word{0%,49%{opacity:0}50%,100%{opacity:1}}
+/* 6 secret knock */
+.o6 .door{position:absolute; top:100px; left:50%; width:150px; height:210px; margin-left:-75px; border:2px solid currentColor; border-radius:70px 70px 6px 6px}
+.o6 .door::after{content:""; position:absolute; right:18px; top:110px; width:12px; height:12px; border-radius:50%; border:2px solid currentColor}
+.o6 .ring{position:absolute; top:160px; left:50%; width:60px; height:60px; margin-left:-30px; border-radius:50%; border:3px solid currentColor; opacity:0; animation:knock 1.5s ease-out infinite}
+.o6 .r2{animation-delay:.3s} .o6 .r3{animation-delay:.6s}
+@keyframes knock{0%{transform:scale(.3); opacity:1}100%{transform:scale(1.6); opacity:0}}
+.o6 .pattern{position:absolute; top:326px; left:0; right:0; text-align:center; font-size:22px; letter-spacing:6px}
+/* 7 lineup */
+.o7 .wall{position:absolute; top:70px; left:20px; right:20px; height:250px; background:repeating-linear-gradient(180deg,transparent 0 23px,rgba(255,255,255,.25) 23px 24px)}
+.o7 .wall span{position:absolute; left:4px; font-size:10px}
+.o7 .suspect{position:absolute; bottom:0; width:96px; text-align:center; font-size:12px}
+.o7 .suspect canvas{width:90px; height:100px; display:block; margin:0 auto}
+.o7 .s1{left:10%} .o7 .s2{right:10%}
+.o7 .spot{position:absolute; top:60px; width:150px; height:270px; left:0; background:radial-gradient(ellipse at 50% 70%,rgba(255,255,255,.28),transparent 65%);
+  animation:spot var(--cycle) ease-in-out infinite}
+@keyframes spot{0%{left:0}30%{left:50%}55%,100%{left:4%}}
+/* 8 laser maze */
+.o8 svg.maze{position:absolute; top:70px; left:20px; width:calc(100% - 40px); height:260px}
+.o8 .l{stroke:#FF2A3D; stroke-width:2; filter:drop-shadow(0 0 4px #FF2A3D)}
+.o8 .path{stroke:currentColor; stroke-width:3; fill:none; stroke-dasharray:600; stroke-dashoffset:600; animation:trace var(--cycle) linear infinite}
+@keyframes trace{0%,8%{stroke-dashoffset:600}70%,100%{stroke-dashoffset:0}}
+/* 9 safe dial */
+.o9 .dial{position:absolute; top:100px; left:50%; width:190px; height:190px; margin-left:-95px; border-radius:50%; border:3px solid currentColor;
+  background:repeating-conic-gradient(currentColor 0 1.5deg,transparent 1.5deg 9deg); animation:dial var(--cycle) ease-in-out infinite}
+.o9 .dial::after{content:""; position:absolute; inset:22px; border-radius:50%; background:var(--nv-bg2); box-shadow:0 0 0 2px currentColor}
+.o9 .knob{position:absolute; top:160px; left:50%; width:70px; height:70px; margin-left:-35px; border-radius:50%; border:3px solid currentColor; display:grid; place-items:center; font-family:"Orbitron"; font-size:16px; z-index:2}
+.o9 .mark{position:absolute; top:88px; left:50%; margin-left:-6px; border-left:6px solid transparent; border-right:6px solid transparent; border-top:12px solid currentColor}
+@keyframes dial{0%{transform:rotate(0)}25%{transform:rotate(250deg)}50%{transform:rotate(90deg)}70%,100%{transform:rotate(200deg)}}
+.o9 .combo{position:absolute; top:306px; left:0; right:0; text-align:center; font-size:18px; letter-spacing:4px}
+/* 10 terminal */
+.o10 .term{position:absolute; top:52px; left:22px; right:22px; font-size:15px; line-height:1.5}
+.o10 .typed{display:inline-block; overflow:hidden; white-space:nowrap; vertical-align:bottom; width:0; animation:type var(--cycle) steps(8) infinite}
+.o10 .t2{animation-name:type2}
+@keyframes type{0%,5%{width:0}25%,100%{width:8ch}}
+@keyframes type2{0%,30%{width:0}50%,100%{width:6ch}}
+.o10 .bar{margin-top:10px; height:12px; border:1.5px solid currentColor; position:relative}
+.o10 .bar i{position:absolute; left:2px; top:2px; bottom:2px; width:0; background:currentColor; animation:bar var(--cycle) linear infinite}
+@keyframes bar{0%,52%{width:0}72%,100%{width:calc(100% - 4px)}}
+.o10 .face{position:absolute; top:236px; left:50%; margin-left:-45px}
+.o10 .face canvas{width:90px; height:100px}
+</style>
+</head>
+<body data-agent="megaspy">
+<div class="top">
+  <div>
+    <h1>🔐 SIA agent login: 10 ways in</h1>
+    <p>All shown inside the Night-Vision look you picked for HQ. Each plays a short demo, then shows ACCESS GRANTED.
+      Whichever you pick, it stays quick and easy for a kid (a few seconds, big targets, no typing needed unless you want it).</p>
+  </div>
+  <div class="toggle"><button class="on" data-agent="megaspy">🦄 megaspy</button><button data-agent="spyhunter">🕵️ spyhunter</button></div>
+</div>
+
+<div class="grid">
+
+<section class="tile"><header><span class="num">1</span><div><h2>Fingerprint scanner</h2>
+  <p>Tap your agent, then hold your thumb on the pad while the ring fills and a scan line sweeps your fingerprint.</p></div></header>
+  <div class="nv o1"><span class="cn c1"></span><span class="cn c2"></span><span class="cn c3"></span><span class="cn c4"></span>
+    <div class="head"><b>●</b> SIA BIOMETRIC GATE</div>
+    <div class="agents"><div class="sel"><canvas class="mascot" data-id="megaspy" width="36" height="40"></canvas>megaspy</div><div><canvas class="mascot" data-id="spyhunter" width="36" height="40"></canvas>spyhunter</div></div>
+    <div class="pad"><div><span class="beam"></span>
+      <svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 44c-3-4-4-9-4-14 0-9 7-16 16-16s16 7 16 16"/><path d="M24 50c-3-5-4-10-4-20 0-6 4-10 10-10s10 4 10 10c0 4 0 8-1 12"/><path d="M30 30c0 8 1 14 4 20"/><path d="M36 52c2-4 3-9 3-14"/><path d="M12 22c3-7 10-12 18-12 7 0 13 3 16 8"/><path d="M47 34c1 5 0 10-2 14"/></svg></div></div>
+    <div class="pending">HOLD THUMB ON THE PAD…</div>
+    <div class="granted">ACCESS GRANTED<small>WELCOME, AGENT <span class="aname">MEGASPY</span></small></div>
+  </div>
+</section>
+
+<section class="tile"><header><span class="num">2</span><div><h2>Eye scan</h2>
+  <p>Look into the scanner: a beam sweeps your eye and the iris zooms. "IRIS MATCH 98%".</p></div></header>
+  <div class="nv o2"><span class="cn c1"></span><span class="cn c2"></span><span class="cn c3"></span><span class="cn c4"></span>
+    <div class="head"><b>●</b> RETINA SCANNER</div>
+    <div class="eye"><div class="iris"></div><span class="sweep"></span></div>
+    <div class="read">SCANNING IRIS…  MATCH 98%<br>AGENT: <span class="aname">MEGASPY</span></div>
+    <div class="pending">LOOK INTO THE SCANNER</div>
+    <div class="granted">ACCESS GRANTED<small>EYE PRINT CONFIRMED</small></div>
+  </div>
+</section>
+
+<section class="tile"><header><span class="num">3</span><div><h2>Secret PIN</h2>
+  <p>Each agent has their own 4-digit secret code on a big glowing keypad.</p></div></header>
+  <div class="nv o3"><span class="cn c1"></span><span class="cn c2"></span><span class="cn c3"></span><span class="cn c4"></span>
+    <div class="head"><b>●</b> ENTER SECRET CODE</div>
+    <div class="agents" style="top:44px"><div class="sel" style="padding:3px 10px">🔒 <span class="aname">MEGASPY</span></div></div>
+    <div class="dots"><i></i><i></i><i></i><i></i></div>
+    <div class="keys"><span class="k k2">1</span><span>2</span><span class="k k4">3</span><span>4</span><span class="k k1">5</span><span>6</span><span class="k k3">7</span><span>8</span><span>9</span><span>✕</span><span>0</span><span>✓</span></div>
+    <div class="granted">ACCESS GRANTED<small>CODE ACCEPTED</small></div>
+  </div>
+</section>
+
+<section class="tile"><header><span class="num">4</span><div><h2>ID card swipe</h2>
+  <p>Drag your agent ID card down through the card reader. The red light turns green.</p></div></header>
+  <div class="nv o4"><span class="cn c1"></span><span class="cn c2"></span><span class="cn c3"></span><span class="cn c4"></span>
+    <div class="head"><b>●</b> SWIPE AGENT ID</div>
+    <div class="card"><canvas class="mascot" data-id="agent" width="36" height="40"></canvas><div>SIA<br><span class="aname">MEGASPY</span><br>AGENT ID</div></div>
+    <div class="reader"><i></i></div>
+    <div class="pending">SWIPE YOUR CARD ↓</div>
+    <div class="granted">ACCESS GRANTED<small>CARD VALID · CLEARANCE: TOP SECRET</small></div>
+  </div>
+</section>
+
+<section class="tile"><header><span class="num">5</span><div><h2>Voice code word</h2>
+  <p>Say your secret code word out loud; petbot's microphone listens. Later this can use the "Jasmin" wake word model!</p></div></header>
+  <div class="nv o5"><span class="cn c1"></span><span class="cn c2"></span><span class="cn c3"></span><span class="cn c4"></span>
+    <div class="head"><b>●</b> VOICE LOCK</div>
+    <div class="say">🎤 SAY THE SECRET WORD…</div>
+    <div class="wave">
+      <i style="animation-delay:-.1s"></i><i style="animation-delay:-.4s"></i><i style="animation-delay:-.2s"></i><i style="animation-delay:-.35s"></i><i style="animation-delay:0s"></i>
+      <i style="animation-delay:-.3s"></i><i style="animation-delay:-.05s"></i><i style="animation-delay:-.45s"></i><i style="animation-delay:-.15s"></i><i style="animation-delay:-.25s"></i>
+      <i style="animation-delay:-.4s"></i><i style="animation-delay:-.1s"></i><i style="animation-delay:-.3s"></i><i style="animation-delay:-.2s"></i></div>
+    <div class="word">"JASMIN"</div>
+    <div class="granted">ACCESS GRANTED<small>VOICE MATCHED · <span class="aname">MEGASPY</span></small></div>
+  </div>
+</section>
+
+<section class="tile"><header><span class="num">6</span><div><h2>Secret knock</h2>
+  <p>Tap your secret rhythm on the door (like knock-knock-kno-o-ock). Each agent has their own.</p></div></header>
+  <div class="nv o6"><span class="cn c1"></span><span class="cn c2"></span><span class="cn c3"></span><span class="cn c4"></span>
+    <div class="head"><b>●</b> KNOCK TO ENTER</div>
+    <div class="door"></div><span class="ring"></span><span class="ring r2"></span><span class="ring r3"></span>
+    <div class="pattern">● ● ━━ ●</div>
+    <div class="pending">TAP YOUR SECRET KNOCK</div>
+    <div class="granted">ACCESS GRANTED<small>KNOCK PATTERN MATCHED</small></div>
+  </div>
+</section>
+
+<section class="tile"><header><span class="num">7</span><div><h2>Suspect lineup</h2>
+  <p>Both agents stand against a height chart. A spotlight searches, you tap yourself: "IDENTITY CONFIRMED".</p></div></header>
+  <div class="nv o7"><span class="cn c1"></span><span class="cn c2"></span><span class="cn c3"></span><span class="cn c4"></span>
+    <div class="head"><b>●</b> IDENTIFY YOURSELF</div>
+    <div class="wall"><span style="top:0">6ft</span><span style="top:72px">5ft</span><span style="top:144px">4ft</span>
+      <div class="suspect s1"><canvas class="mascot" data-id="megaspy" width="90" height="100"></canvas>No. 1 megaspy</div>
+      <div class="suspect s2"><canvas class="mascot" data-id="spyhunter" width="90" height="100"></canvas>No. 2 spyhunter</div></div>
+    <div class="spot"></div>
+    <div class="pending">TAP YOURSELF IN THE LINEUP</div>
+    <div class="granted">IDENTITY CONFIRMED<small>WELCOME, AGENT <span class="aname">MEGASPY</span></small></div>
+  </div>
+</section>
+
+<section class="tile"><header><span class="num">8</span><div><h2>Laser maze</h2>
+  <p>Drag your finger through the gaps in the lasers to reach the vault. Touch a laser and you start over!</p></div></header>
+  <div class="nv o8"><span class="cn c1"></span><span class="cn c2"></span><span class="cn c3"></span><span class="cn c4"></span>
+    <div class="head"><b>●</b> REACH THE VAULT</div>
+    <svg class="maze" viewBox="0 0 260 260" preserveAspectRatio="none">
+      <line class="l" x1="0" y1="60" x2="170" y2="60"/><line class="l" x1="220" y1="60" x2="260" y2="60"/>
+      <line class="l" x1="0" y1="120" x2="40" y2="120"/><line class="l" x1="90" y1="120" x2="260" y2="120"/>
+      <line class="l" x1="0" y1="180" x2="150" y2="180"/><line class="l" x1="200" y1="180" x2="260" y2="180"/>
+      <rect x="108" y="222" width="44" height="30" fill="none" stroke="currentColor" stroke-width="2"/>
+      <text x="130" y="242" fill="currentColor" font-size="11" text-anchor="middle" font-family="Share Tech Mono">VAULT</text>
+      <path class="path" d="M195 20 L195 90 L65 90 L65 150 L175 150 L175 205 L130 205 L130 222"/>
+    </svg>
+    <div class="pending">DRAG THROUGH THE GAPS</div>
+    <div class="granted">VAULT OPEN<small>AGENT <span class="aname">MEGASPY</span> MADE IT THROUGH</small></div>
+  </div>
+</section>
+
+<section class="tile"><header><span class="num">9</span><div><h2>Safe combination</h2>
+  <p>Spin the safe dial to your secret numbers: right, left, right. Click-click-CLUNK!</p></div></header>
+  <div class="nv o9"><span class="cn c1"></span><span class="cn c2"></span><span class="cn c3"></span><span class="cn c4"></span>
+    <div class="head"><b>●</b> CRACK YOUR SAFE</div>
+    <span class="mark"></span><div class="dial"></div><div class="knob">SIA</div>
+    <div class="combo">12 · 40 · 7</div>
+    <div class="pending">SPIN TO YOUR NUMBERS</div>
+    <div class="granted">SAFE OPEN<small>WELCOME, AGENT <span class="aname">MEGASPY</span></small></div>
+  </div>
+</section>
+
+<section class="tile"><header><span class="num">10</span><div><h2>Terminal code word</h2>
+  <p>A hacker login: type your agent name and secret password, then watch the access bar load.</p></div></header>
+  <div class="nv o10"><span class="cn c1"></span><span class="cn c2"></span><span class="cn c3"></span><span class="cn c4"></span>
+    <div class="term">SIA-NET SECURE LOGIN<br><br>
+      AGENT&nbsp;&nbsp;&nbsp;: <span class="typed"><span class="aname">MEGASPY</span></span><br>
+      PASSWORD: <span class="typed t2">******</span><br>
+      <div class="bar"><i></i></div></div>
+    <div class="face"><canvas class="mascot" data-id="agent" width="90" height="100"></canvas></div>
+    <div class="granted">ACCESS GRANTED<small>SIA-NET CONNECTED</small></div>
+  </div>
+</section>
+
+</div>
+<footer>Tell Claude the number you like. You can also mix, e.g. "1, but with the eye scan animation from 2".</footer>
+
+<script>
+// ART-BEGIN
+const UNICORN_SPY = [['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc8180','03dfe4260','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'],
+  ['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc4180','03dfe2260','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'],
+  ['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc2180','03dfe1260','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800'],
+  ['000000000','000000000','000000010','000000030','000040060','0000400c0','000460040','001ff0380','003ff0700','007fd8f00','007fcdc00','00ffcf800','01ffffe00','01fff8f00','01ff20780','03dfc1180','03dfe0a60','07fee03f8','07bde07fc','07fcf8ffe','077cffffe','0ef8ffffe','0ef87ffe7','0df87ffff','0df9ffffe','1df1ffffe','1df1ffcee','1df1fef1c','1df1fe7f8','3de1fe0c0','3de1ff000','3de1ff000','3fe1ff000','7bc1ff000','7fc1ff000','77c3ff000','7fc3ff800','6f83ff800','6f83ff800','7fc3ff800']];
+const AGENT_SPY = [['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','001c71800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8'],
+  ['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','001c71800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8'],
+  ['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','001a69800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8'],
+  ['000000000','000000000','00076e000','003f9fc00','003fdfc00','003fffc00','003fffc00','003fffc00','000000000','007fffe00','0fffffff0','0fffffff0','0fffffff0','000fff000','000fff000','001861800','001a69800','001861800','001cf3800','001fff800','001fff800','001fff800','000fff800','001f07800','001fffc00','003fffc00','003fffc00','0079f9e00','00f0f0f00','01f861f80','03fc23fc0','03fe07fc0','03fe07fc0','07ff0ffe0','07ff9ffe0','07ffdffe0','0fffffff0','0fffffff0','0fffffff8','1fffffff8']];
+// ART-END
+let agent = 'megaspy';
+const ART = {megaspy: UNICORN_SPY, spyhunter: AGENT_SPY};
+const cache = {};
+const bits = id => cache[id] || (cache[id] = ART[id].map(f => f.map(h => parseInt(h, 16).toString(2).padStart(36, '0'))));
+function draw(t) {
+  const phase = Math.floor(t / 150) % 20;
+  document.querySelectorAll('canvas.mascot').forEach(cv => {
+    const id = cv.dataset.id === 'agent' ? agent : cv.dataset.id, rows = bits(id)[phase < 4 ? phase : 0];
+    const g = cv.getContext('2d'), px = cv.width / 36;
+    g.clearRect(0, 0, cv.width, cv.height);
+    g.fillStyle = getComputedStyle(cv).color;
+    rows.forEach((row, y) => { for (let x = 0; x < 36; x++) if (row[x] === '1') g.fillRect(x * px, y * px, Math.ceil(px), Math.ceil(px)); });
+  });
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+document.querySelectorAll('.toggle button').forEach(b => b.onclick = () => {
+  agent = b.dataset.agent; document.body.dataset.agent = agent;
+  document.querySelectorAll('.toggle button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.aname').forEach(s => s.textContent = agent.toUpperCase());
+  document.querySelectorAll('.agents div').forEach(d => { const c = d.querySelector('canvas'); if (c) d.classList.toggle('sel', c.dataset.id === agent); });
+});
+</script>
+</body>
+</html>
